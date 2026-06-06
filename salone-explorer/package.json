@@ -6,7 +6,8 @@
   "description": "Salone Explorer - Sierra Leone tour-guide SPA (FambulTik / TpGroup).",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && tsx scripts/generate-sitemap.ts",
+    "build:prerender": "npm run build && tsx scripts/prerender.ts",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",

@@ -1,0 +1,9 @@
+# Salone Explorer robots policy (SPEC §13.1). Public pages crawlable;
+# account and auth routes disallowed.
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /signin
+Disallow: /signup
+
+Sitemap: https://slint-ai-led-sdlc.tpgroupsl.com/sitemap.xml

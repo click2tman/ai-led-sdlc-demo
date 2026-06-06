@@ -3,6 +3,14 @@
   "app.tagline": "Discover Sierra Leone, one attraction at a time.",
   "app.skipToContent": "Skip to main content",
 
+  "brand.name": "FambulTik",
+  "brand.logoAlt": "FambulTik - Salone Explorer home",
+  "brand.publisher": "TpGroup (SL) Limited",
+  "brand.parentEndorsement": "A TpGroup company",
+  "brand.org.description": "TpGroup (SL) Limited is the publisher of Salone Explorer, operating the heritage-and-diaspora brand FambulTik.",
+  "brand.site.description": "A FambulTik guide to the tourist attractions of Sierra Leone, published by TpGroup (SL) Limited for demonstration and educational purposes.",
+  "brand.destination.name": "Sierra Leone",
+
   "nav.home": "Home",
   "nav.about": "About",
   "nav.account": "My Account",
@@ -74,6 +82,7 @@
   "auth.social.facebook": "Continue with Facebook",
   "auth.social.linkedin": "Continue with LinkedIn",
   "auth.signout.success": "You have been signed out.",
+  "auth.notEnabled": "Sign-in is not enabled in this build yet. Account features arrive in a later phase.",
 
   "account.title": "My Account",
   "account.profile.heading": "Profile",
