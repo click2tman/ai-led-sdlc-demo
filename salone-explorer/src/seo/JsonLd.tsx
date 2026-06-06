@@ -7,9 +7,13 @@ type JsonLdProps = {
 };
 
 export function JsonLd({ data }: JsonLdProps) {
+  // Escape "<" so a string containing "</script>" (e.g. an FAQ or description)
+  // cannot break out of the script element or survive the prerender
+  // serialization as markup. "<" is valid inside JSON-LD.
+  const json = JSON.stringify(data).replace(/</g, '\\u003c');
   return (
     <Helmet>
-      <script type="application/ld+json">{JSON.stringify(data)}</script>
+      <script type="application/ld+json">{json}</script>
     </Helmet>
   );
 }

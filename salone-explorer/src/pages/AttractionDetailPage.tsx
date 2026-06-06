@@ -3,7 +3,12 @@
 // and sources. The first description paragraph and the hours block are
 // marked data-speakable for AEO (§13.3). Facts come from the record; all
 // labels come from the content layer.
-import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router-dom';
+import {
+  Link,
+  useLoaderData,
+  useLocation,
+  type LoaderFunctionArgs,
+} from 'react-router-dom';
 import { attractions, t, getImageCredit } from '@/lib/content';
 import type { Attraction } from '@/data/types';
 import { attractionPath } from '@/lib/site';
@@ -26,12 +31,13 @@ export async function attractionLoader({
 type DetailData = Awaited<ReturnType<typeof attractionLoader>>;
 
 function NotFound() {
+  const { pathname } = useLocation();
   return (
     <>
       <SeoHead
         title={`${t('attraction.notFound.title')} - ${t('app.name')}`}
         description={t('attraction.notFound.body')}
-        path="/"
+        path={pathname}
         noindex
       />
       <section className="mx-auto max-w-3xl px-4 py-16 text-center">

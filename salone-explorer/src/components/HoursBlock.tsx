@@ -10,6 +10,10 @@ type HoursBlockProps = {
 };
 
 export function HoursBlock({ hours }: HoursBlockProps) {
+  // Only show a time row when there is a genuine range. Records that are
+  // open-ended (e.g. a multi-day trek using 00:00-00:00) or have no times
+  // rely on daysOpen + notes, mirroring the JSON-LD builder.
+  const hasRange = Boolean(hours.open && hours.close && hours.open !== hours.close);
   return (
     <section
       aria-labelledby="hours-heading"
@@ -26,10 +30,14 @@ export function HoursBlock({ hours }: HoursBlockProps) {
       <dl className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
         <dt className="text-text-muted">{t('attraction.openingHours.days')}</dt>
         <dd>{hours.daysOpen}</dd>
-        <dt className="text-text-muted">{t('attraction.openingHours.time')}</dt>
-        <dd>
-          {hours.open} - {hours.close}
-        </dd>
+        {hasRange && (
+          <>
+            <dt className="text-text-muted">{t('attraction.openingHours.time')}</dt>
+            <dd>
+              {hours.open} - {hours.close}
+            </dd>
+          </>
+        )}
       </dl>
       {hours.notes && (
         <p className="mt-2 text-sm text-warning">

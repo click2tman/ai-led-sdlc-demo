@@ -1,16 +1,17 @@
 // 404 page (SPEC §7). noindex; offers a route back to Home.
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { t } from '@/lib/content';
 import { SeoHead } from '@/seo/SeoHead';
 import { buttonVariants } from '@/components/Button';
 
 export function NotFoundPage() {
+  const { pathname } = useLocation();
   return (
     <>
       <SeoHead
         title={`${t('notFound.title')} - ${t('app.name')}`}
         description={t('notFound.body')}
-        path="/"
+        path={pathname}
         noindex
       />
       <section className="mx-auto max-w-3xl px-4 py-16 text-center">

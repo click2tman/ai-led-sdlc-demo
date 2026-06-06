@@ -51,6 +51,21 @@ function buildSitemap(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
+function buildRobots(): string {
+  return [
+    '# Salone Explorer robots policy (SPEC §13.1). Generated at build time so',
+    '# the Sitemap URL always matches the deployed origin (VITE_SITE_URL).',
+    'User-agent: *',
+    'Allow: /',
+    'Disallow: /account',
+    'Disallow: /signin',
+    'Disallow: /signup',
+    '',
+    `Sitemap: ${siteUrl}/sitemap.xml`,
+    '',
+  ].join('\n');
+}
+
 function buildLlmsTxt(): string {
   const lines: string[] = [
     '# Salone Explorer',
@@ -72,5 +87,8 @@ if (!existsSync(distDir)) {
 }
 writeFileSync(resolve(distDir, 'sitemap.xml'), buildSitemap());
 writeFileSync(resolve(distDir, 'llms.txt'), buildLlmsTxt());
+writeFileSync(resolve(distDir, 'robots.txt'), buildRobots());
 
-console.log(`generate-sitemap: wrote sitemap.xml (${entries.length} urls) and llms.txt`);
+console.log(
+  `generate-sitemap: wrote sitemap.xml (${entries.length} urls), llms.txt, robots.txt`,
+);
