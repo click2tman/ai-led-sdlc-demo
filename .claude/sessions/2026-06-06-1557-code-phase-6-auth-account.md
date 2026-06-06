@@ -158,6 +158,22 @@ passed end-to-end (agent-browser):
 No code changes were needed during live verification. Phase 5 provisioning
 (#10) and Phase 7 smoke (#12) are now satisfied on this project.
 
+- 2026-06-06 17:45 EDT - Copilot review on PR #37: fixed all 5 unique
+  findings (commit 5a222e8) and resolved all 11 review threads. (1)
+  AuthProvider.signIn/signUp seed+return the session, closing the
+  navigate-vs-onAuthStateChange race; signUp returns null when email
+  confirmation is required and AuthForm shows auth.signup.checkEmail instead
+  of redirect-looping. (2) ScheduleTourModal.todayIso() now uses local date
+  parts, not UTC. (3) AccountPage clears actionError on reload. (4)
+  attraction-specific aria-labels on Remove/Cancel. (5) corrected saved.ts
+  header comment. Gates green incl. a11y 5/5. PR #37 all CI green.
+- 2026-06-06 17:50 EDT - Remaining-work pass: filed dependency triage issue
+  #38 (Group A safe-now #20-22; Group B green majors to re-test post-Phase-6
+  #28-31,#24; Group C build-failing coordinated upgrades React19/ESLint-flat/
+  Vite8 #23,#25,#26,#27,#32). Filed review follow-ups #39 (RLS integration
+  test), #40 (DS Toast), #41 (booking confirm step), #42 (notes constraint
+  ADR). Assessed Phase 2.5 (#13): code-complete; documented exact run steps
+  (needs service-role key + attractions.sql). No code changes needed there.
 - 2026-06-06 17:20 EDT - Follow-up commit 56351d2: mapAuthError now maps
   429/over_email_send_rate_limit/*_rate_limit to a new errors.auth.rateLimit
   key (was the misleading generic "could not sign you in"); reads the
