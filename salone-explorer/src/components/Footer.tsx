@@ -1,7 +1,7 @@
 // Site footer (SPEC §9.1, DS Footer pattern). Renders the full §17
 // disclaimer (one of its three mandatory placements), the TpGroup
 // endorsement line, a persistent help/contact link (WCAG 3.2.6), and the
-// the Built-with-Claude-Code credit. Identical on every route.
+// Built-with-Claude-Code credit. Identical on every route.
 import { Link } from 'react-router-dom';
 import { t } from '@/lib/content';
 

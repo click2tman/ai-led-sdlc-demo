@@ -13,13 +13,14 @@ type AttractionRow = {
   short_description: string;
   long_description: string;
   region: string;
-  latitude: number;
-  longitude: number;
+  // PostgREST returns `numeric` columns as strings; accept both and coerce.
+  latitude: number | string;
+  longitude: number | string;
   hours_open: string | null;
   hours_close: string | null;
   hours_days: string | null;
   hours_notes: string | null;
-  rating: number | null;
+  rating: number | string | null;
   review_count: number | null;
   images: string[] | null;
   video_url: string | null;
@@ -54,7 +55,7 @@ function toAttraction(row: AttractionRow): Attraction {
       daysOpen: row.hours_days ?? '',
       notes: row.hours_notes ?? undefined,
     },
-    rating: row.rating ?? 0,
+    rating: Number(row.rating ?? 0),
     reviewCount: row.review_count ?? 0,
     images: row.images ?? [],
     videoUrl: row.video_url ?? undefined,

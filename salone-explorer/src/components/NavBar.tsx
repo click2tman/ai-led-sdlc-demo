@@ -6,9 +6,9 @@ import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { FambulTikLogo } from './FambulTikLogo';
-import { t } from '@/lib/content';
+import { t, type StringKey } from '@/lib/content';
 
-type NavItem = { to: string; label: string };
+type NavItem = { to: string; label: StringKey };
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'nav.home' },
@@ -36,7 +36,7 @@ export function NavBar() {
             {NAV_ITEMS.map((item) => (
               <li key={item.to}>
                 <NavLink to={item.to} className={navLinkClass} end={item.to === '/'}>
-                  {t(item.label as Parameters<typeof t>[0])}
+                  {t(item.label)}
                 </NavLink>
               </li>
             ))}
@@ -74,7 +74,7 @@ export function NavBar() {
                   end={item.to === '/'}
                   onClick={() => setOpen(false)}
                 >
-                  {t(item.label as Parameters<typeof t>[0])}
+                  {t(item.label)}
                 </NavLink>
               </li>
             ))}
