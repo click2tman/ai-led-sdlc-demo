@@ -40,6 +40,13 @@ export function AuthForm({ mode }: AuthFormProps) {
     const password = String(form.get('password') ?? '');
     const displayName = String(form.get('displayName') ?? '').trim();
 
+    // The form is noValidate (we own messaging), so guard required fields
+    // here rather than letting a blank submit reach Supabase as a vague error.
+    if (!email || !password) {
+      setErrorKey('errors.auth.required');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const session = isSignup

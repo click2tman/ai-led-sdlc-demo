@@ -37,9 +37,12 @@ export function NavBar() {
   async function handleSignOut() {
     setOpen(false);
     // The SDK clears the local session even on a failed remote call; always
-    // navigate home rather than leave a half-signed-out header.
+    // navigate home rather than leave a half-signed-out header. Swallow the
+    // error explicitly so it cannot surface as an unhandled rejection.
     try {
       await signOut();
+    } catch {
+      // Intentional: local session is already cleared; nothing to recover.
     } finally {
       navigate('/');
     }

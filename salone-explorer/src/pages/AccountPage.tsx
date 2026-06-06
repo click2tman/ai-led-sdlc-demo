@@ -78,9 +78,12 @@ export function AccountPage() {
 
   async function handleSignOut() {
     // The SDK clears the local session even if the remote call fails, so
-    // always navigate home; never strand the user on a protected page.
+    // always navigate home; never strand the user on a protected page. Swallow
+    // the error explicitly so it cannot become an unhandled rejection.
     try {
       await signOut();
+    } catch {
+      // Intentional: local session is already cleared; nothing to recover.
     } finally {
       navigate('/');
     }
