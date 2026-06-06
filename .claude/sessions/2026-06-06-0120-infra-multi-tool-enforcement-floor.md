@@ -48,6 +48,35 @@ of the hooks deferred to a follow-up.
   fired on the first commit attempt because the body contained the literal
   hook-bypass flag string; reworded.
 
+### Update - 2026-06-06 01:52 EDT
+
+Summary: code-push: 2d187e2 docs: separate app subdir from harness and
+relocate flyer
+
+Git:
+  branch: chore-multi-tool-enforcement-floor
+  last-commit: 2d187e2 docs: separate app subdir from harness and relocate flyer
+  staged: 0   modified: 0   untracked: 0
+  files-touched-since-last-update:
+    - CLAUDE.md, SPEC.md, README.md, STUDENT_GUIDE.md
+    - .claude/rules/three-layer-separation.md
+    - .claude/skills/verification-loop/SKILL.md
+    - .claude/agents/code-reviewer.md
+    - docs/adr/0001-app-subdirectory-separation.md
+    - docs/architecture.html
+    - AI-SDLC-Training-Flyer/ -> docs/AI-SDLC-Training-Flyer/ (renamed)
+    - .DS_Store (untracked)
+
+Verification:
+  last-run: 2026-06-06 01:52 EDT (secret scan only; no app to lint/build)
+  status: pass (secret scan exit 0)
+
+Notes:
+  - Single commit by user direction: enforcement-floor doc edits plus the
+    flyer relocation into docs/ and the .DS_Store untrack.
+  - Untracked root .DS_Store (already in .gitignore) via git rm --cached.
+  - Proceeding to /handoff: PR base dev per branch-conventions (chore branch).
+
 ## Findings
 - `pre-tool-bash.sh`, `pre-tool-edit.sh`, `scan-secrets.sh` hold the
   enforcement logic to mirror. `scan-secrets.sh --staged` is already
