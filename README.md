@@ -2,7 +2,7 @@
 
 > Discover Sierra Leone, one attraction at a time.
 
-A mobile-first, **WCAG 2.2 Level AA**, SEO- and GEO-optimised tour-guide web app for Sierra Leone. Published by **TpGroup (SL) Limited** under the **FambulTik** brand and built on the [TpGroup Design System](https://design.tpgroupsl.com/). Architected around a strict **separation of code, data, and content** so editorial work never blocks engineering — and so the codebase is ready to migrate to **Payload CMS** without touching UI code.
+A mobile-first, **WCAG 2.2 Level AA**, SEO-, AEO-, and GEO-optimised tour-guide web app for Sierra Leone. Published by **TpGroup (SL) Limited** under the **FambulTik** brand and built on the [TpGroup Design System](https://design.tpgroupsl.com/). Architected around a strict **separation of code, data, and content** so editorial work never blocks engineering — and so the codebase is ready to migrate to **Payload CMS** without touching UI code.
 
 [![CI](https://github.com/click2tman/ai-led-sdlc-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/click2tman/ai-led-sdlc-demo/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/click2tman/ai-led-sdlc-demo/actions/workflows/codeql.yml/badge.svg)](https://github.com/click2tman/ai-led-sdlc-demo/actions/workflows/codeql.yml)
@@ -19,6 +19,8 @@ A mobile-first, **WCAG 2.2 Level AA**, SEO- and GEO-optimised tour-guide web app
 
 > *Salone Explorer is built by TpGroup (SL) Limited under the **FambulTik** brand for **demonstration and educational purposes only**. It is not an official tourism service and does not represent any government body. Attraction details, opening hours, and ratings are curated from public sources and may be inaccurate or out of date. Always verify directly with the operator before travelling. No payments or real bookings are processed by this application.*
 
+> **Phase 11 caveat.** The "no payments" statement above holds for the in-class build (Phases 1–7). The optional Stripe payments phase (Phase 11) requires this disclaimer to be revised before enabling live payments. See `SPEC.md` §17.
+
 ---
 
 ## Table of Contents
@@ -33,7 +35,7 @@ A mobile-first, **WCAG 2.2 Level AA**, SEO- and GEO-optimised tour-guide web app
 8. [Data & Content Files](#data--content-files)
 9. [Data Sources](#data-sources)
 10. [Accessibility — WCAG 2.2 AA](#accessibility--wcag-22-aa)
-11. [SEO & GEO](#seo--geo)
+11. [SEO, AEO & GEO](#seo-aeo--geo)
 12. [Structured Data (JSON-LD)](#structured-data-json-ld)
 13. [Mobile & Responsive Standards](#mobile--responsive-standards)
 14. [Security & SAST](#security--sast)
@@ -116,11 +118,12 @@ Design tokens are wired into Tailwind via CSS variables in `src/styles/tokens.cs
 - All attraction data externalised to `src/data/attractions.json`, accessed via a repository.
 - Mobile-first; verified at 320 / 375 / 414 / 768 / 1024 / 1440 px.
 - Pre-rendered HTML for crawlers and LLM ingestion.
-- Schema.org JSON-LD entity graph.
+- Schema.org JSON-LD entity graph; SEO, AEO, and GEO optimisation.
 - Persistent demo-disclaimer alert.
 
 ### Phase 2 — Authenticated experience
 - Email / password auth via Supabase.
+- **Social login** — Google, Facebook, LinkedIn (Supabase OAuth).
 - **Bookmarks** and **Favorites** toggles.
 - **Schedule a Tour** dialog.
 - **My Account** page; cancel support.
@@ -128,6 +131,12 @@ Design tokens are wired into Tailwind via CSS variables in `src/styles/tokens.cs
 
 ### Phase 2.5 — Optional database migration
 Flip `VITE_ATTRACTIONS_SOURCE=supabase` to load attractions from the database instead of JSON. No UI changes required.
+
+### Phases 9–11 — Production extensions (post-class)
+Beyond the in-class build; each adds real non-functional weight (server compute, secrets, moderation, legal). Specified in `SPEC.md` §2 and §19.
+- **Phase 9 — Real-time reviews.** Authenticated reviews with live updates (Supabase Realtime), moderation, and `aggregateRating` feeding the JSON-LD graph.
+- **Phase 10 — Email notifications.** Transactional email for booking/review events via Supabase Edge Functions + an email provider.
+- **Phase 11 — Payments (Stripe).** Tour-deposit checkout processed server-side in Edge Functions with webhook verification. Requires the §17 disclaimer revision.
 
 ### Phase 8 — Future
 Migrate to Payload CMS. See [Migrating to Payload CMS](#migrating-to-payload-cms-future).
@@ -150,6 +159,11 @@ Migrate to Payload CMS. See [Migrating to Payload CMS](#migrating-to-payload-cms
 | Content layer    | `src/content/*.json` + `t()` helper                                   |
 | Backend (P2)     | Supabase (Postgres + Auth + RLS)                                      |
 | Client SDK       | `@supabase/supabase-js` v2                                            |
+| Auth providers (P6) | Supabase Auth: email/password + Google, Facebook, LinkedIn OAuth   |
+| Realtime (P9)    | Supabase Realtime (live review updates)                               |
+| Server compute (P10, P11) | Supabase Edge Functions (Deno) — holds Stripe/email secrets  |
+| Email (P10)      | Transactional provider (e.g. Resend) via Edge Function               |
+| Payments (P11)   | Stripe (`@stripe/stripe-js` client + Stripe SDK server-side)         |
 | Maps             | Google Maps deep links (no API key)                                   |
 | A11y testing     | `@axe-core/playwright`, `eslint-plugin-jsx-a11y`, Lighthouse          |
 | Hosting          | Vercel                                                                |
@@ -206,6 +220,9 @@ Vite only exposes variables prefixed with `VITE_` to client code.
 | `VITE_ATTRACTIONS_SOURCE`   | Both phases        | `file` (default) or `supabase`. Picks the active repository.      |
 | `VITE_SUPABASE_URL`         | Phase 2            | Supabase project URL.                                             |
 | `VITE_SUPABASE_ANON_KEY`    | Phase 2            | Supabase anon (public) key.                                       |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Phase 11         | Stripe publishable (client) key.                                  |
+
+**Server-side secrets are never `VITE_`-exposed.** Social-login OAuth client IDs/secrets (Google, Facebook, LinkedIn) are configured in the Supabase dashboard. Stripe and email secrets live as Supabase Edge Function secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (Phase 11), `EMAIL_PROVIDER_API_KEY` (Phase 10).
 
 `.env.example`:
 
@@ -214,6 +231,8 @@ VITE_SITE_URL=https://ai-led-sdlc-demo.vercel.app
 VITE_ATTRACTIONS_SOURCE=file
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
+# Phase 11 (client publishable key only):
+VITE_STRIPE_PUBLISHABLE_KEY=
 ```
 
 ---
@@ -329,9 +348,11 @@ Full success-criterion-by-success-criterion checklist in `SPEC.md` §10.
 
 ---
 
-## SEO & GEO
+## SEO, AEO & GEO
 
 **SEO.** Semantic HTML5; one `<h1>` per page; per-page `<title>` ≤ 60, description ≤ 160; OG + Twitter; canonical URLs; `robots.txt`; build-time `sitemap.xml` generated from the active attractions repository; pre-rendered HTML.
+
+**AEO (Answer Engine Optimization).** Optimised for answer engines and assistants (Google AI Overviews, Perplexity, ChatGPT, Copilot, voice): question-shaped headings with extractable first-sentence answers, `SpeakableSpecification` JSON-LD over each attraction's lead and key facts, self-contained `FAQPage` answers, and citable fact blocks high on detail pages. Builds on GEO + JSON-LD with no new client dependency. See `SPEC.md` §13.3.
 
 **GEO.** Definitional lead sentences in `longDescription`; inline source attributions; per-attraction FAQ → `FAQPage` JSON-LD; `llms.txt` generated from the repository; visible "Last reviewed" date → `dateModified`.
 
@@ -346,6 +367,8 @@ Each page emits a Schema.org `@graph`:
 - `WebSite`, `WebPage`, `BreadcrumbList` per route.
 - `TouristAttraction` per attraction with `address`, `geo`, `aggregateRating`, `openingHoursSpecification`, `image`, `video`, `containedInPlace`.
 - `FAQPage` per attraction.
+- `Review` per published review (Phase 9), aggregated into `aggregateRating`.
+- `SpeakableSpecification` on the attraction lead + key facts (AEO).
 
 Validate at [validator.schema.org](https://validator.schema.org/) and Google's [Rich Results Test](https://search.google.com/test/rich-results).
 
@@ -376,7 +399,7 @@ Merges to `main` require all four workflows green:
 | `security.yml`| Semgrep (OWASP, JS, TS, React, secrets) + `npm audit --audit-level=high` |
 | `a11y.yml`    | `@axe-core/playwright` on five routes                                  |
 
-App-level: no secrets in client code; RLS on every user-scoped table; `rel="noopener noreferrer"` on outbound links; security headers in `vercel.json`.
+App-level: no secrets in client code; RLS on every user-scoped table; `rel="noopener noreferrer"` on outbound links; security headers in `vercel.json`. For the production extensions: OAuth redirect URLs allow-listed in Supabase (no open redirect, P6); review bodies sanitised, length-bounded, rate-limited, and moderation-gated (P9); Stripe and email secrets held only as Edge Function secrets (P10/P11); Stripe webhooks signature-verified before any DB write, with payment status written only by the Edge Function service role (P11).
 
 ---
 
@@ -385,9 +408,9 @@ App-level: no secrets in client code; RLS on every user-scoped table; `rel="noop
 1. Provision Supabase via the Vercel integration or directly at supabase.com.
 2. Copy URL + anon key into Vercel env vars (with `VITE_` prefix) and `.env.local`.
 3. Run `supabase/schema.sql` in the SQL Editor.
-4. Auth → Email enabled; "Confirm email" disabled for the class.
+4. Auth → Email enabled ("Confirm email" disabled for the class); enable the Google, Facebook, and LinkedIn OAuth providers (Phase 6) with their client IDs/secrets and allow-listed redirect URLs.
 
-Tables: `profiles`, `saved_attractions` (bookmarks + favorites via `kind` enum), `tour_bookings`. RLS on all three, scoped `auth.uid() = user_id`.
+Tables: `profiles`, `saved_attractions` (bookmarks + favorites via `kind` enum), `tour_bookings`. RLS on all three, scoped `auth.uid() = user_id`. The production extensions add `reviews` (Phase 9) and `payments` (Phase 11), each with RLS — see the draft schema in `SPEC.md` §6.6.
 
 ### Phase 2.5 — Migrate attractions to Supabase (optional)
 
@@ -481,6 +504,14 @@ See `SPEC.md` §5.4 for the architectural sketch.
 ### Phase 2.5 (optional)
 - [ ] `VITE_ATTRACTIONS_SOURCE=supabase` produces identical pages.
 - [ ] No component diff between modes.
+
+### Phases 6, 9–11 (production extensions)
+- [ ] Phase 6: Google, Facebook, LinkedIn sign-in each complete and create a `profiles` row; no provider secret in the client bundle.
+- [ ] Phase 9: one review per user per attraction, list updates live, only published reviews are public (RLS verified), `aggregateRating` reflects them.
+- [ ] Phase 10: booking create/cancel triggers an email; provider key only an Edge Function secret.
+- [ ] Phase 11: deposit checkout succeeds in Stripe test mode, booking marked paid only via verified webhook, no Stripe secret in the client, disclaimer revised before live mode.
+
+Full criteria in `SPEC.md` §20.
 
 ---
 

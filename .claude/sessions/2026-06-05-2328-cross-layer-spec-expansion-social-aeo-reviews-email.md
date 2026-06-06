@@ -66,6 +66,21 @@ Edited SPEC.md (additive, surgical):
 Verified no residual scope/payment contradictions beyond the intentional
 disclaimer + scoped guardrail.
 
+### 2026-06-05 23:58 EDT - README mirrored + full backlog created
+- README.md updated to mirror the latest SPEC: intro (AEO), disclaimer
+  Phase-11 caveat, Features (social login + Phases 9-11), Tech Stack
+  rows, env vars, SEO/AEO/GEO section + ToC, JSON-LD entities, security,
+  Supabase backend (OAuth + reviews/payments tables), acceptance criteria.
+- Created baseline build-phase issues #6-#13:
+  - #6 Phase 1 Scaffold, #7 Phase 2 Data/content/repository,
+    #8 Phase 3 SEO/JSON-LD/brand/UI/a11y, #9 Phase 4 CI+Deploy,
+    #10 Phase 5 Supabase provisioning, #11 Phase 6 Auth+account,
+    #12 Phase 7 Ship v2, #13 Phase 2.5 migrate attractions.
+- Full backlog = #1-#13. Phase 8 (Payload CMS) intentionally not
+  created: SPEC marks it out of scope for the class.
+- Clarified to user: GitHub issue numbers (#1-5) != SPEC phase numbers;
+  nothing was skipped.
+
 ## Findings
 - SPEC section 2 "Out of scope (all phases)" currently lists exactly the
   three features being added (payments, real-time reviews, email/SMS).
