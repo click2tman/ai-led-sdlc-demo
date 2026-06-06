@@ -81,9 +81,20 @@ export const supabaseSavedRepository: SavedAttractionRepository = {
   },
 
   async remove(attractionId, kind) {
+    // Defense in depth: scope the delete to the authenticated user explicitly
+    // so a misconfigured RLS policy can never widen this into a cross-user
+    // delete (the unique key is per user, but the filter must be too).
+    const {
+      data: { user },
+      error: userError,
+    } = await getSupabase().auth.getUser();
+    if (userError) throw userError;
+    if (!user) throw new Error('Cannot remove a save: no authenticated user.');
+
     const { error } = await getSupabase()
       .from('saved_attractions')
       .delete()
+      .eq('user_id', user.id)
       .eq('attraction_id', attractionId)
       .eq('kind', kind);
     if (error) throw error;

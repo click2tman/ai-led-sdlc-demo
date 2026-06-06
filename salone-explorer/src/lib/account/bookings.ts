@@ -76,9 +76,20 @@ export const supabaseBookingRepository: TourBookingRepository = {
   },
 
   async cancel(id) {
+    // Defense in depth: scope the update to the authenticated user as well as
+    // the row id, so a weakened RLS policy cannot let one user cancel
+    // another's booking by guessing an id.
+    const {
+      data: { user },
+      error: userError,
+    } = await getSupabase().auth.getUser();
+    if (userError) throw userError;
+    if (!user) throw new Error('Cannot cancel a booking: no authenticated user.');
+
     const { error } = await getSupabase()
       .from('tour_bookings')
       .update({ status: 'cancelled' })
+      .eq('user_id', user.id)
       .eq('id', id);
     if (error) throw error;
   },

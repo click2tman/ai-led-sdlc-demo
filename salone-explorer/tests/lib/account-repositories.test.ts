@@ -71,6 +71,11 @@ function argsOf(method: string): unknown[] | undefined {
   return client.calls.find(([name]) => name === method)?.[1];
 }
 
+/** All recorded argument tuples for a builder method, in call order. */
+function allArgsOf(method: string): unknown[][] {
+  return client.calls.filter(([name]) => name === method).map(([, args]) => args);
+}
+
 describe('savedAttractions repository', () => {
   it('maps rows from listByKind', async () => {
     client.setResult({
@@ -128,10 +133,27 @@ describe('savedAttractions repository', () => {
     );
   });
 
-  it('remove deletes by attraction and kind', async () => {
+  it('remove deletes scoped to the user, attraction, and kind', async () => {
     client.setResult({ data: null, error: null });
     await savedAttractions.remove('tiwai-island', 'favorite');
     expect(client.calls).toContainEqual(['delete', []]);
+    // Defense in depth: the delete must be filtered by user_id as well as the
+    // attraction and kind, so a weakened RLS policy cannot widen its blast.
+    expect(allArgsOf('eq')).toEqual([
+      ['user_id', 'user-1'],
+      ['attraction_id', 'tiwai-island'],
+      ['kind', 'favorite'],
+    ]);
+  });
+
+  it('remove throws when there is no authenticated user', async () => {
+    client.auth.getUser.mockResolvedValueOnce({
+      data: { user: null },
+      error: null,
+    } as never);
+    await expect(
+      savedAttractions.remove('tiwai-island', 'favorite'),
+    ).rejects.toThrow(/no authenticated user/);
   });
 });
 
@@ -168,11 +190,14 @@ describe('tourBookings repository', () => {
     ]);
   });
 
-  it('cancel sets status to cancelled', async () => {
+  it('cancel sets status to cancelled, scoped to the user and id', async () => {
     client.setResult({ data: null, error: null });
     await tourBookings.cancel('b-1');
     expect(argsOf('update')).toEqual([{ status: 'cancelled' }]);
-    expect(argsOf('eq')).toEqual(['id', 'b-1']);
+    expect(allArgsOf('eq')).toEqual([
+      ['user_id', 'user-1'],
+      ['id', 'b-1'],
+    ]);
   });
 
   it('list maps rows soonest-first as returned by the query', async () => {

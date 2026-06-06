@@ -18,6 +18,8 @@ import {
 import type { Attraction } from '@/data/types';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { t, type StringKey } from '@/lib/content';
+import { SeoHead } from '@/seo/SeoHead';
+import { Button } from '@/components/Button';
 
 /** Map a booking status to its content key so no enum value reaches the UI. */
 const STATUS_KEY: Record<BookingStatus, StringKey> = {
@@ -25,8 +27,6 @@ const STATUS_KEY: Record<BookingStatus, StringKey> = {
   confirmed: 'account.tours.status.confirmed',
   cancelled: 'account.tours.status.cancelled',
 };
-import { SeoHead } from '@/seo/SeoHead';
-import { Button } from '@/components/Button';
 
 /** Format an ISO timestamp as a localised date for display (not content). */
 function formatDate(iso: string): string {
@@ -42,6 +42,7 @@ export function AccountPage() {
   const { user, signOut } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [actionError, setActionError] = useState(false);
   const [byId, setById] = useState<Map<string, Attraction>>(new Map());
   const [bookmarks, setBookmarks] = useState<SavedAttraction[]>([]);
   const [favorites, setFavorites] = useState<SavedAttraction[]>([]);
@@ -73,21 +74,42 @@ export function AccountPage() {
   }, [load]);
 
   async function handleSignOut() {
-    await signOut();
-    navigate('/');
+    // The SDK clears the local session even if the remote call fails, so
+    // always navigate home; never strand the user on a protected page.
+    try {
+      await signOut();
+    } finally {
+      navigate('/');
+    }
   }
 
   async function handleRemoveSaved(attractionId: string, kind: SavedKind) {
-    await savedAttractions.remove(attractionId, kind);
-    const setter = kind === 'bookmark' ? setBookmarks : setFavorites;
-    setter((rows) => rows.filter((r) => r.attractionId !== attractionId));
+    setActionError(false);
+    try {
+      await savedAttractions.remove(attractionId, kind);
+      const setter = kind === 'bookmark' ? setBookmarks : setFavorites;
+      setter((rows) => rows.filter((r) => r.attractionId !== attractionId));
+    } catch {
+      // Surface the failure and re-sync from the server so the list never
+      // shows a row as removed when the delete did not land.
+      setActionError(true);
+      void load();
+    }
   }
 
   async function handleCancelTour(id: string) {
-    await tourBookings.cancel(id);
-    setTours((rows) =>
-      rows.map((row) => (row.id === id ? { ...row, status: 'cancelled' } : row)),
-    );
+    setActionError(false);
+    try {
+      await tourBookings.cancel(id);
+      setTours((rows) =>
+        rows.map((row) =>
+          row.id === id ? { ...row, status: 'cancelled' } : row,
+        ),
+      );
+    } catch {
+      setActionError(true);
+      void load();
+    }
   }
 
   return (
@@ -128,6 +150,12 @@ export function AccountPage() {
             {t('account.profile.signout')}
           </Button>
         </section>
+
+        {actionError && (
+          <p role="alert" className="mt-8 text-sm text-danger">
+            {t('errors.generic')}
+          </p>
+        )}
 
         {error ? (
           <p role="alert" className="mt-8 text-sm text-danger">

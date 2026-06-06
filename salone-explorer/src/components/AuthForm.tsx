@@ -50,6 +50,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       navigate('/account');
     } catch (error) {
       setErrorKey(mapAuthError(error));
+    } finally {
       setSubmitting(false);
     }
   }
@@ -67,6 +68,7 @@ export function AuthForm({ mode }: AuthFormProps) {
               name="displayName"
               type="text"
               autoComplete="name"
+              maxLength={100}
               className="min-h-[44px] rounded-md border border-border px-3"
             />
           </div>
@@ -112,7 +114,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         )}
       </form>
 
-      <SocialSignInButtons onError={setErrorKey} />
+      <SocialSignInButtons />
 
       <p className="text-sm text-text-muted">
         <Link

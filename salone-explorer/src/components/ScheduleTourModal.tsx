@@ -13,6 +13,7 @@ import { Button } from './Button';
 
 const MIN_PARTY = 1;
 const MAX_PARTY = 20;
+const MAX_NOTES = 500;
 
 /** Today's date as YYYY-MM-DD for the date input's min and past-date check. */
 function todayIso(): string {
@@ -37,7 +38,11 @@ export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
     dialogRef.current?.showModal();
   }
 
-  function validate(date: string, partySize: number): StringKey | null {
+  function validate(
+    date: string,
+    partySize: number,
+    notes: string,
+  ): StringKey | null {
     if (!date) return 'schedule.validation.dateRequired';
     if (date < todayIso()) return 'schedule.validation.datePast';
     if (
@@ -47,6 +52,9 @@ export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
     ) {
       return 'schedule.validation.partyRange';
     }
+    // Belt-and-suspenders: the textarea maxLength caps input, but validate the
+    // boundary explicitly in case the form is submitted programmatically.
+    if (notes.length > MAX_NOTES) return 'schedule.validation.notesLength';
     return null;
   }
 
@@ -58,7 +66,7 @@ export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
     const partySize = Number(form.get('partySize'));
     const notes = String(form.get('notes') ?? '').trim();
 
-    const invalid = validate(date, partySize);
+    const invalid = validate(date, partySize, notes);
     if (invalid) {
       setErrorKey(invalid);
       return;
@@ -149,6 +157,7 @@ export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
               id="notes"
               name="notes"
               rows={3}
+              maxLength={MAX_NOTES}
               placeholder={t('schedule.field.notes.placeholder')}
               className="rounded-md border border-border px-3 py-2"
             />

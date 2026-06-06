@@ -85,6 +85,10 @@ export function SaveButton({
         setSaved(true);
         setAnnouncement(t(labels.added));
       }
+    } catch {
+      // The state only updates after a successful await, so it stays correct;
+      // announce the failure rather than letting the rejection go unhandled.
+      if (mounted.current) setAnnouncement(t('errors.generic'));
     } finally {
       if (mounted.current) setBusy(false);
     }

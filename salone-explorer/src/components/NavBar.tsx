@@ -36,8 +36,13 @@ export function NavBar() {
 
   async function handleSignOut() {
     setOpen(false);
-    await signOut();
-    navigate('/');
+    // The SDK clears the local session even on a failed remote call; always
+    // navigate home rather than leave a half-signed-out header.
+    try {
+      await signOut();
+    } finally {
+      navigate('/');
+    }
   }
 
   /** Primary links plus the auth control, shared by desktop and mobile. */

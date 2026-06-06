@@ -17,17 +17,17 @@ const PROVIDERS: ProviderConfig[] = [
   { provider: 'linkedin_oidc', label: 'auth.social.linkedin' },
 ];
 
-export function SocialSignInButtons({
-  onError,
-}: {
-  onError: (messageKey: StringKey) => void;
-}) {
+export function SocialSignInButtons() {
   const { signInWithOAuth, configured } = useAuth();
   const [pending, setPending] = useState<OAuthProvider | null>(null);
+  // Own error region so a social-sign-in failure is announced next to the
+  // social buttons, not inside the email/password form's alert (WCAG 3.3.1).
+  const [errorKey, setErrorKey] = useState<StringKey | null>(null);
 
   async function handleClick(provider: OAuthProvider) {
+    setErrorKey(null);
     if (!configured) {
-      onError('auth.notEnabled');
+      setErrorKey('auth.notEnabled');
       return;
     }
     setPending(provider);
@@ -36,7 +36,7 @@ export function SocialSignInButtons({
       // On success the browser navigates away; no further UI update needed.
     } catch (error) {
       setPending(null);
-      onError(mapAuthError(error));
+      setErrorKey(mapAuthError(error));
     }
   }
 
@@ -58,6 +58,11 @@ export function SocialSignInButtons({
           {t(label)}
         </Button>
       ))}
+      {errorKey && (
+        <p role="alert" className="text-sm text-danger">
+          {t(errorKey)}
+        </p>
+      )}
     </div>
   );
 }
