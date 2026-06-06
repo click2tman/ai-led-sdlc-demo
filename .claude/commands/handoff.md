@@ -61,11 +61,12 @@ Claude never runs `gh pr merge` (denied by hook).
     reviewRequests` omits bot reviewers; confirm with
     `gh api repos/<owner>/<repo>/pulls/<pr>/requested_reviewers`.
 
-11. **Start the background watcher.** Launch it as a backgrounded Bash
-    process so this turn completes; the harness re-invokes you when the
-    watcher exits with Copilot's comments (or a timeout):
+11. **Start the background watcher** so this turn completes and the harness
+    re-invokes you when the watcher exits with Copilot's comments (or a
+    timeout). Run it backgrounded — with the Bash tool's background mode
+    (`run_in_background: true`), or a trailing `&` when run by hand:
     ```
-    .claude/scripts/copilot-review.sh watch <pr>
+    .claude/scripts/copilot-review.sh watch <pr> &
     ```
 
 12. **Resolve on watcher completion** — apply the Copilot resolution

@@ -15,7 +15,7 @@ Claude never merges — Copilot is a reviewer, not a gate Claude clears.
   -> verification-loop, code-reviewer, security-reviewer   (unchanged)
   -> open draft PR, comment URL on issue                   (unchanged)
   -> copilot-review.sh request <pr>                        (add Copilot reviewer)
-  -> copilot-review.sh watch <pr>   (background)           (poll until review)
+  -> copilot-review.sh watch <pr> &  (background)          (poll until review)
   -- harness re-invokes Claude when the watcher exits --
   -> classify each Copilot thread:
        safe   -> fix + verification-loop + /code-push + resolve-thread

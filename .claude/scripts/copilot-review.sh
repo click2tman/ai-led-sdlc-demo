@@ -72,7 +72,7 @@ is_copilot_requested() {
 #   3  the API would not add Copilot (feature not enabled / needs admin or
 #      a manual click) - caller should still start the watcher
 cmd_request() {
-  local pr="$1" repo
+  local pr="$1" repo out rc
   [ -n "$pr" ] || die "usage: copilot-review.sh request <pr>"
   repo="$(repo_slug)"
 
@@ -81,21 +81,30 @@ cmd_request() {
     return 0
   fi
 
-  # POST is best-effort: GitHub answers 201 even when it ignores the bot,
-  # so we verify rather than trust the response. Never report a success we
-  # did not actually get (no silent fallback).
-  gh api --method POST "repos/$repo/pulls/$pr/requested_reviewers" \
-    -f "reviewers[]=$COPILOT_LOGIN" >/dev/null 2>&1 || true
+  # POST the reviewer request. A non-zero status here is a genuine failure
+  # (auth, bad PR number, network) and must surface loudly - it is not the
+  # same as "Copilot not enabled", so do not swallow it.
+  set +e
+  out="$(gh api --method POST "repos/$repo/pulls/$pr/requested_reviewers" \
+    -f "reviewers[]=$COPILOT_LOGIN" 2>&1)"
+  rc=$?
+  set -e
+  if [ "$rc" -ne 0 ]; then
+    die "request to add Copilot on $repo#$pr failed: $out"
+  fi
 
+  # GitHub returns 201 even when it silently drops the Copilot bot (Copilot
+  # code review not enabled for the repo), so verify rather than trust the
+  # status code. Never report a success we did not actually get.
   if is_copilot_requested "$repo" "$pr"; then
     echo "requested Copilot review on $repo#$pr"
     return 0
   fi
 
   >&2 cat <<MSG
-copilot-review: could not add Copilot as a reviewer on $repo#$pr via the API.
-GitHub accepts the request (201) but drops the Copilot bot unless Copilot
-code review is enabled for the repository. Enable it once (repo admin):
+copilot-review: GitHub accepted the request on $repo#$pr but did not add the
+Copilot bot. This happens when Copilot code review is not enabled for the
+repository. Enable it once (repo admin):
   Settings -> Code review -> Automatically request Copilot code review
 or request it manually from the PR's Reviewers menu. The watcher will pick
 up Copilot's review once it appears.
