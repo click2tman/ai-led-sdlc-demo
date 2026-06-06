@@ -38,6 +38,8 @@ async function isFile(path) {
 async function resolveFile(pathname) {
   const clean = normalize(decodeURIComponent(pathname.split('?')[0]));
   const candidate = clean === '/' ? '/index.html' : clean;
+  // path.join (not path.resolve) keeps distDir as the base even though
+  // `candidate` has a leading "/": join('/dist', '/about') === '/dist/about'.
   let abs = join(distDir, candidate);
   // Path-traversal guard: never escape dist.
   if (!abs.startsWith(distDir)) return join(distDir, 'index.html');
