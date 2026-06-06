@@ -3,6 +3,9 @@
 > **Publisher:** TpGroup (SL) Limited
 > **Brand:** **FambulTik** — TpGroup's heritage-and-diaspora subsidiary
 > **Repository:** `git@github.com:click2tman/ai-led-sdlc-demo.git`
+> **Production domain:** `slint-ai-led-sdlc.tpgroupsl.com`
+> **Vercel project:** `tp-isent/ai-led-sdlc-demo` ([dashboard](https://vercel.com/tp-isent/ai-led-sdlc-demo))
+> **Supabase project:** `slint-ai-led-sdlc-demo`
 > **Design system:** [TpGroup Design System](https://design.tpgroupsl.com/) (multi-brand, WCAG 2.2 AA)
 > **Disclaimer:** *This application is built for demonstration and educational purposes only. It is not an official tourism service. Information is curated from public sources and may be out of date — confirm details with the operator before travelling.*
 
@@ -913,12 +916,15 @@ Four workflows; merges to `main` require all four green.
 ## 16. Environment Variables
 
 ```env
-VITE_SITE_URL=https://ai-led-sdlc-demo.vercel.app
+# Canonical site URL — production custom domain. Drives canonical URLs,
+# sitemap.xml, OG/Twitter tags, and llms.txt. Vercel preview deploys use
+# their generated *.vercel.app URL.
+VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com
 
 # Data source toggle: "file" (Phase 1 default) or "supabase" (Phase 2.5)
 VITE_ATTRACTIONS_SOURCE=file
 
-# Phase 2
+# Phase 2 — Supabase project: slint-ai-led-sdlc-demo
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 
@@ -1001,7 +1007,7 @@ Node 20+ required.
 18. Add `.github/workflows/*` and `dependabot.yml`.
 19. Add `tests/a11y/smoke.spec.ts`.
 20. Update README; commit; push.
-21. Connect repo to Vercel (Vite preset, `dist`); set `VITE_SITE_URL` and `VITE_ATTRACTIONS_SOURCE=file`; deploy.
+21. Connect the repo to the **existing** Vercel project `tp-isent/ai-led-sdlc-demo` (do not create a new one; Vite preset, `dist`); set `VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com` and `VITE_ATTRACTIONS_SOURCE=file`; map the `slint-ai-led-sdlc.tpgroupsl.com` domain; deploy.
 22. Validate live URL with Schema.org Validator + Lighthouse.
 
 ### Phase 5 — Supabase provisioning (≈ 10 min)

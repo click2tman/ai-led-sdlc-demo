@@ -11,7 +11,8 @@ A mobile-first, **WCAG 2.2 Level AA**, SEO-, AEO-, and GEO-optimised tour-guide 
 [![WCAG 2.2 AA](https://img.shields.io/badge/WCAG-2.2%20AA-15803D)](https://www.w3.org/TR/WCAG22/)
 [![Built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-7C3AED)](https://docs.claude.com/claude-code)
 
-**Live demo:** _to be populated after first Vercel deploy._
+**Live demo:** [slint-ai-led-sdlc.tpgroupsl.com](https://slint-ai-led-sdlc.tpgroupsl.com) _(production domain; live after first deploy)_
+**Vercel project:** [`tp-isent/ai-led-sdlc-demo`](https://vercel.com/tp-isent/ai-led-sdlc-demo) &middot; **Supabase project:** `slint-ai-led-sdlc-demo`
 
 ---
 
@@ -227,7 +228,8 @@ Vite only exposes variables prefixed with `VITE_` to client code.
 `.env.example`:
 
 ```env
-VITE_SITE_URL=https://ai-led-sdlc-demo.vercel.app
+# Production custom domain. Vercel preview deploys use their *.vercel.app URL.
+VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com
 VITE_ATTRACTIONS_SOURCE=file
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
@@ -449,9 +451,10 @@ See `SPEC.md` §5.4 for the architectural sketch.
 ## Deployment
 
 ### Vercel
-1. Import repo. Framework Preset: **Vite**. Build Command: `npm run build`. Output Directory: `dist`.
-2. Set env vars: `VITE_SITE_URL`, `VITE_ATTRACTIONS_SOURCE=file`, and (Phase 2) `VITE_SUPABASE_*`.
-3. Deploy. Auto-deploys on every push to `main`.
+Project: [`tp-isent/ai-led-sdlc-demo`](https://vercel.com/tp-isent/ai-led-sdlc-demo). Use the existing project — do not create a new one.
+1. Connect the repo to the existing project. Framework Preset: **Vite**. Build Command: `npm run build`. Output Directory: `dist`.
+2. Set env vars: `VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com`, `VITE_ATTRACTIONS_SOURCE=file`, and (Phase 2) `VITE_SUPABASE_*`.
+3. Map the `slint-ai-led-sdlc.tpgroupsl.com` domain. Deploy. Auto-deploys on every push to `main`.
 
 ### Post-deploy verification
 - `/robots.txt`, `/sitemap.xml`, `/llms.txt` resolve.
