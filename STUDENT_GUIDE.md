@@ -263,8 +263,8 @@ A good agent should warn you when you've over-scoped — accept the warning.
    ```
 
 4. **Watch.** When Claude asks for clarification, answer briefly. When it commits, glance at the diff.
-5. **Spot-check the separation early.** After the first UI commit, run `grep -rn '"Sign in"\|"Home"\|"Schedule a Tour"' src/components src/pages src/lib`. If anything matches, push back: "Move those literals to `src/content/strings.en.json`."
-6. **Around minute 35**, open Vercel, import the GitHub repo, set Framework Preset = Vite, click Deploy.
+5. **Spot-check the separation early.** After the first UI commit, run (from the app dir) `cd salone-explorer && grep -rn '"Sign in"\|"Home"\|"Schedule a Tour"' src/components src/pages src/lib`. If anything matches, push back: "Move those literals to `src/content/strings.en.json`."
+6. **Around minute 35**, open Vercel, import the GitHub repo, set Framework Preset = Vite, **Root Directory = `salone-explorer`**, click Deploy.
 7. **At minute 42**, open the live URL on your phone. Verify the FambulTik logo, the disclaimer, the responsive grid, keyboard focus rings, and Get Directions.
 
 ### In class — Phase 2 (if time permits)
@@ -299,7 +299,7 @@ A good agent should warn you when you've over-scoped — accept the warning.
 - Re-enable "Confirm email" in Supabase for production.
 - Run Lighthouse on the live URL.
 - One full keyboard-only walkthrough and one screen-reader pass (VoiceOver or NVDA).
-- Verify the separation: `grep -rn '"[A-Z][a-z]' src/components src/pages | wc -l` — should return zero matches for user-facing strings.
+- Verify the separation (from `salone-explorer/`): `grep -rn '"[A-Z][a-z]' src/components src/pages | wc -l` — should return zero matches for user-facing strings.
 
 ---
 

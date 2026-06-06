@@ -1,0 +1,338 @@
+[
+  {
+    "id": "tiwai-island",
+    "name": "Tiwai Island Wildlife Sanctuary",
+    "shortDescription": "A river-island rainforest reserve on the Moa with one of the highest primate densities in the world.",
+    "longDescription": "Tiwai Island Wildlife Sanctuary is a 12-square-kilometre island reserve in the Moa River, in the Southern Province of Sierra Leone. It protects a tract of Upper Guinean rainforest and is known for an exceptionally high density of primates, including the Diana monkey and the western chimpanzee.\n\nThe island has hosted a biological research station since the early 1980s and is managed in partnership with surrounding communities. The nearby river forests are also associated with the rare and elusive pygmy hippopotamus.\n\nVisitors typically join guided forest walks, night walks, and river boat trips, with birdwatching a draw throughout. Basic community-run accommodation is available on the island, and access is by boat from the riverbank.",
+    "location": {
+      "region": "Pujehun District, Southern Province",
+      "latitude": 7.55,
+      "longitude": -11.35
+    },
+    "hours": {
+      "open": "08:00",
+      "close": "17:00",
+      "daysOpen": "Daily",
+      "notes": "Hours vary - confirm locally"
+    },
+    "rating": 4.7,
+    "reviewCount": 128,
+    "images": [
+      "/images/attractions/tiwai-island.webp"
+    ],
+    "tags": [
+      "wildlife",
+      "ecotourism",
+      "island"
+    ],
+    "sources": [
+      "https://ntb.gov.sl/",
+      "https://www.visitsierraleone.org/"
+    ],
+    "faqs": [
+      {
+        "question": "How do you get to Tiwai Island?",
+        "answer": "Tiwai Island is reached by road to a landing on the Moa River, then by canoe or boat across to the island. Most visitors arrange transport and a guide in advance through a tour operator or the sanctuary's community administration."
+      },
+      {
+        "question": "What wildlife can you see on Tiwai Island?",
+        "answer": "The sanctuary protects one of the highest primate densities in the world, with species such as the Diana monkey and western chimpanzee. The surrounding river forests are also associated with the rare pygmy hippopotamus, and birdlife is abundant."
+      }
+    ],
+    "lastReviewed": "2026-06-06"
+  },
+  {
+    "id": "river-no-2-beach",
+    "name": "River No. 2 Beach",
+    "shortDescription": "A community-managed white-sand beach where a freshwater river meets the Atlantic on the Freetown Peninsula.",
+    "longDescription": "River No. 2 Beach is a white-sand beach on the Western Area Peninsula, a short drive south of Freetown, where the River No. 2 flows down from the peninsula hills to meet the Atlantic Ocean.\n\nThe beach is run by a local development association, and tourism income supports the surrounding community. Calm conditions and clean sand have made it one of the best-known beaches in Sierra Leone.\n\nVisitors come to swim, relax, and eat fresh fish at simple beachside stalls. It is a popular family destination at weekends and can be combined with visits to other peninsula beaches.",
+    "location": {
+      "region": "Western Area Peninsula",
+      "latitude": 8.2667,
+      "longitude": -13.1833
+    },
+    "hours": {
+      "open": "08:00",
+      "close": "18:00",
+      "daysOpen": "Daily",
+      "notes": "Hours vary - confirm locally"
+    },
+    "rating": 4.6,
+    "reviewCount": 210,
+    "images": [
+      "/images/attractions/river-no-2-beach.webp"
+    ],
+    "tags": [
+      "beach",
+      "swimming",
+      "family"
+    ],
+    "sources": [
+      "https://tourismsierraleone.com/",
+      "https://www.visitsierraleone.org/"
+    ],
+    "faqs": [
+      {
+        "question": "Is River No. 2 Beach safe for swimming?",
+        "answer": "The beach is well known for swimming, but sea conditions change with tides and weather. Always check locally on the day and supervise children closely, as there are no lifeguards."
+      },
+      {
+        "question": "Who manages River No. 2 Beach?",
+        "answer": "The beach is managed by a local community development association, and visitor spending helps fund services in the surrounding village."
+      }
+    ],
+    "lastReviewed": "2026-06-06"
+  },
+  {
+    "id": "bunce-island",
+    "name": "Bunce Island",
+    "shortDescription": "Ruins of an 18th-century British slave-trading fort in the Sierra Leone River, a key transatlantic heritage site.",
+    "longDescription": "Bunce Island is a small island in the Sierra Leone River estuary that holds the ruins of a British slave-trading fortress active through much of the 18th century. It was one of the most significant departure points of the transatlantic slave trade in the region.\n\nMany people trafficked from Bunce Island were taken to the rice-growing coasts of South Carolina and Georgia, and the site has a documented connection to the Gullah and Geechee communities of the United States.\n\nThe ruins are preserved as a heritage site and are usually visited on a guided boat tour from Freetown. Interpretation focuses on the history of the trade and its enduring diaspora links.",
+    "location": {
+      "region": "Sierra Leone River Estuary",
+      "latitude": 8.5667,
+      "longitude": -13.0333
+    },
+    "hours": {
+      "open": "09:00",
+      "close": "16:00",
+      "daysOpen": "By tour arrangement",
+      "notes": "Hours vary - confirm locally"
+    },
+    "rating": 4.8,
+    "reviewCount": 96,
+    "images": [
+      "/images/attractions/bunce-island.webp"
+    ],
+    "tags": [
+      "history",
+      "heritage",
+      "slave-trade"
+    ],
+    "sources": [
+      "https://www.sierraleoneheritage.org/museum",
+      "https://ntb.gov.sl/"
+    ],
+    "faqs": [
+      {
+        "question": "Why is Bunce Island historically important?",
+        "answer": "Bunce Island was a major British slave-trading fort in the 18th century, and many people shipped from it were taken to South Carolina and Georgia. It has a strong documented connection to the Gullah and Geechee communities of the American South."
+      },
+      {
+        "question": "How do you visit Bunce Island?",
+        "answer": "The island is reached by boat from Freetown, usually as part of an organised guided tour that includes interpretation of the ruins and their history."
+      }
+    ],
+    "lastReviewed": "2026-06-06"
+  },
+  {
+    "id": "tacugama-chimpanzee-sanctuary",
+    "name": "Tacugama Chimpanzee Sanctuary",
+    "shortDescription": "A rainforest sanctuary near Freetown that rescues and rehabilitates orphaned, critically endangered western chimpanzees.",
+    "longDescription": "Tacugama Chimpanzee Sanctuary is a conservation centre set in rainforest within the Western Area Peninsula National Park, in the hills above Freetown. It was established in the mid-1990s to rescue and rehabilitate orphaned western chimpanzees, a critically endangered subspecies.\n\nThe sanctuary cares for chimpanzees confiscated from the illegal pet and bushmeat trades, and it runs education and habitat-protection programmes with neighbouring communities.\n\nVisitors can join scheduled guided tours to learn about the animals and the sanctuary's work, and eco-lodges on site allow overnight stays. Tours are run at set times and usually need to be booked in advance.",
+    "location": {
+      "region": "Western Area Peninsula National Park",
+      "latitude": 8.4167,
+      "longitude": -13.1833
+    },
+    "hours": {
+      "open": "10:30",
+      "close": "16:00",
+      "daysOpen": "Daily (scheduled tours)",
+      "notes": "Hours vary - confirm locally"
+    },
+    "rating": 4.8,
+    "reviewCount": 342,
+    "images": [
+      "/images/attractions/tacugama-chimpanzee-sanctuary.webp"
+    ],
+    "tags": [
+      "wildlife",
+      "conservation",
+      "primates"
+    ],
+    "sources": [
+      "https://www.visitsierraleone.org/",
+      "https://tourismsierraleone.com/"
+    ],
+    "faqs": [
+      {
+        "question": "Do you need to book a tour at Tacugama?",
+        "answer": "Yes. Tacugama runs guided tours at set times during the day, and booking in advance is recommended so the sanctuary can manage visitor numbers around the animals' welfare."
+      },
+      {
+        "question": "Can you stay overnight at Tacugama?",
+        "answer": "The sanctuary has eco-lodges set in the forest, allowing visitors to stay overnight while supporting its conservation work."
+      }
+    ],
+    "lastReviewed": "2026-06-06"
+  },
+  {
+    "id": "sierra-leone-national-museum",
+    "name": "Sierra Leone National Museum",
+    "shortDescription": "Freetown's national museum of history and ethnography, near the historic Cotton Tree.",
+    "longDescription": "The Sierra Leone National Museum is the country's national museum, located in central Freetown close to the site of the historic Cotton Tree. It opened in the late 1950s and holds collections spanning the nation's history, ethnography, and cultural heritage.\n\nDisplays include masks, textiles, archaeological finds, and objects connected to Sierra Leone's secret societies and regional cultures. The museum is overseen by the national monuments and relics authority.\n\nIt offers an accessible introduction to the country's heritage for first-time visitors and is an easy stop within a walking tour of central Freetown.",
+    "location": {
+      "region": "Freetown, Western Area",
+      "latitude": 8.487,
+      "longitude": -13.2343
+    },
+    "hours": {
+      "open": "09:00",
+      "close": "17:00",
+      "daysOpen": "Monday to Saturday",
+      "notes": "Hours vary - confirm locally"
+    },
+    "rating": 4.3,
+    "reviewCount": 87,
+    "images": [
+      "/images/attractions/sierra-leone-national-museum.webp"
+    ],
+    "tags": [
+      "history",
+      "culture",
+      "museum"
+    ],
+    "sources": [
+      "https://www.sierraleoneheritage.org/museum",
+      "https://ntb.gov.sl/"
+    ],
+    "faqs": [
+      {
+        "question": "What can you see at the Sierra Leone National Museum?",
+        "answer": "The museum displays historical, ethnographic, and cultural collections, including masks, textiles, and archaeological objects that introduce visitors to Sierra Leone's heritage."
+      },
+      {
+        "question": "Where is the Sierra Leone National Museum?",
+        "answer": "It is in central Freetown, near the historic Cotton Tree site, within walking distance of other city-centre landmarks."
+      }
+    ],
+    "lastReviewed": "2026-06-06"
+  },
+  {
+    "id": "banana-islands",
+    "name": "Banana Islands",
+    "shortDescription": "A small chain of islands off the Freetown Peninsula with snorkelling, fishing villages, and slave-trade history.",
+    "longDescription": "The Banana Islands are a small chain of islands off the southern tip of the Freetown Peninsula, reached by boat from the village of Kent. The main islands of Dublin and Ricketts are linked by a stone causeway.\n\nThe islands have a layered history, including a former settlement linked to the era of the slave trade, with old church ruins and remnants still visible. Fishing communities live on the islands today.\n\nVisitors come for snorkelling and swimming in clear water, boat trips, and quiet village stays. Community-run guesthouses make overnight visits possible.",
+    "location": {
+      "region": "Freetown Peninsula",
+      "latitude": 8.1,
+      "longitude": -13.2167
+    },
+    "hours": {
+      "open": "08:00",
+      "close": "18:00",
+      "daysOpen": "Daily",
+      "notes": "Hours vary - confirm locally"
+    },
+    "rating": 4.6,
+    "reviewCount": 74,
+    "images": [
+      "/images/attractions/banana-islands.webp"
+    ],
+    "tags": [
+      "island",
+      "snorkeling",
+      "history"
+    ],
+    "sources": [
+      "https://www.visitsierraleone.org/",
+      "https://tourismsierraleone.com/"
+    ],
+    "faqs": [
+      {
+        "question": "How do you get to the Banana Islands?",
+        "answer": "The islands are reached by boat from the village of Kent at the southern end of the Freetown Peninsula. Trips are usually arranged with local boat operators or through a guesthouse."
+      },
+      {
+        "question": "What is there to do on the Banana Islands?",
+        "answer": "Visitors snorkel and swim in clear water, take boat trips, explore historic ruins, and stay in community-run guesthouses on the islands."
+      }
+    ],
+    "lastReviewed": "2026-06-06"
+  },
+  {
+    "id": "outamba-kilimi-national-park",
+    "name": "Outamba-Kilimi National Park",
+    "shortDescription": "A northern savanna-and-forest park near the Guinea border, home to hippos, elephants, and primates.",
+    "longDescription": "Outamba-Kilimi National Park lies in the north of Sierra Leone, near the border with Guinea, in a transition zone between savanna and forest. It is one of the country's most established parks for larger wildlife.\n\nThe park is known for hippos along its rivers, as well as elephants, several primate species, and a wide range of birds. Its two sections, Outamba and Kilimi, together protect a varied landscape of grassland, woodland, and waterways.\n\nActivities include walking safaris, river trips by canoe, and birdwatching, usually with park guides. Basic accommodation is available for visitors staying overnight.",
+    "location": {
+      "region": "Bombali / Karene District, Northern Province",
+      "latitude": 9.85,
+      "longitude": -12.2667
+    },
+    "hours": {
+      "open": "07:00",
+      "close": "17:00",
+      "daysOpen": "Daily",
+      "notes": "Hours vary - confirm locally"
+    },
+    "rating": 4.4,
+    "reviewCount": 41,
+    "images": [
+      "/images/attractions/outamba-kilimi-national-park.webp"
+    ],
+    "tags": [
+      "safari",
+      "hippos",
+      "elephants"
+    ],
+    "sources": [
+      "https://ntb.gov.sl/",
+      "https://www.visitsierraleone.org/"
+    ],
+    "faqs": [
+      {
+        "question": "What animals live in Outamba-Kilimi National Park?",
+        "answer": "The park is known for hippos along its rivers, along with elephants, several primate species, and abundant birdlife across its savanna and forest habitats."
+      },
+      {
+        "question": "What can you do in Outamba-Kilimi National Park?",
+        "answer": "Visitors take guided walking safaris, river trips by canoe, and birdwatching outings. Basic accommodation is available for those staying overnight."
+      }
+    ],
+    "lastReviewed": "2026-06-06"
+  },
+  {
+    "id": "mount-bintumani",
+    "name": "Mount Bintumani",
+    "shortDescription": "Sierra Leone's highest peak, in the Loma Mountains - a multi-day biodiversity trek to 1,945 metres.",
+    "longDescription": "Mount Bintumani, in the Loma Mountains of northern Sierra Leone, is the highest peak in the country at around 1,945 metres. It is among the highest summits in West Africa west of Cameroon.\n\nThe mountain and its surrounding range protect montane grassland and forest, supporting notable biodiversity, including primates and many bird species across changing altitude zones.\n\nReaching the summit is a multi-day trek through forest and grassland, typically with local guides and porters. It is a demanding route best attempted in the drier months and with proper preparation.",
+    "location": {
+      "region": "Koinadugu District, Northern Province",
+      "latitude": 9.2167,
+      "longitude": -11.1167
+    },
+    "hours": {
+      "open": "00:00",
+      "close": "00:00",
+      "daysOpen": "Multi-day trek",
+      "notes": "Hours vary - confirm locally"
+    },
+    "rating": 4.7,
+    "reviewCount": 53,
+    "images": [
+      "/images/attractions/mount-bintumani.webp"
+    ],
+    "tags": [
+      "hiking",
+      "mountain",
+      "biodiversity"
+    ],
+    "sources": [
+      "https://www.visitsierraleone.org/",
+      "https://sierra-leone.org/"
+    ],
+    "faqs": [
+      {
+        "question": "How high is Mount Bintumani?",
+        "answer": "Mount Bintumani rises to about 1,945 metres, making it the highest peak in Sierra Leone and one of the highest in West Africa west of Cameroon."
+      },
+      {
+        "question": "How long does it take to climb Mount Bintumani?",
+        "answer": "The ascent is a multi-day trek through forest and grassland, usually undertaken with local guides and porters and best attempted in the drier season with proper preparation."
+      }
+    ],
+    "lastReviewed": "2026-06-06"
+  }
+]

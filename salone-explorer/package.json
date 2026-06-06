@@ -1,0 +1,56 @@
+{
+  "name": "salone-explorer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Salone Explorer - Sierra Leone tour-guide SPA (FambulTik / TpGroup).",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build && tsx scripts/generate-sitemap.ts",
+    "build:prerender": "npm run build && tsx scripts/prerender.ts",
+    "preview": "vite preview",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:a11y": "playwright test",
+    "migrate:attractions": "tsx scripts/migrate-attractions-to-supabase.ts"
+  },
+  "dependencies": {
+    "@radix-ui/react-accordion": "^1.2.2",
+    "@supabase/supabase-js": "^2.47.10",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.469.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-helmet-async": "^2.0.5",
+    "react-router-dom": "^6.28.1"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.49.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "^20.17.10",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "jsdom": "^25.0.1",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

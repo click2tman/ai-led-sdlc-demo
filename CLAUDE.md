@@ -14,6 +14,61 @@ The project target is **Salone Explorer**, a Sierra Leone tour-guide SPA publish
 
 When scaffolding, follow `SPEC.md` §19 (Delivery Workflow) phase by phase, and commit at the end of each phase.
 
+## Repository layout: app vs harness (binding)
+
+The shippable application and the AI-led SDLC harness live in **separate
+trees** so the production artefact never contains the tooling:
+
+```
+ai-led-sdlc-demo/          <- repo root: harness + docs + spec only
+├── .claude/               <- AI harness (NOT deployed)
+├── docs/                  <- documentation (NOT deployed)
+├── SPEC.md  README.md     <- spec + front door
+└── salone-explorer/       <- the Vite app — the ONLY thing Vercel builds
+    ├── package.json  vite.config.ts  tsconfig.json
+    └── src/{components,pages,lib,data,content,...}
+```
+
+- The app is scaffolded into `salone-explorer/` (a repo subdirectory),
+  not the repo root. `npm create vite@latest salone-explorer` (SPEC §19
+  Phase 1) already produces this folder.
+- **Vercel Root Directory = `salone-explorer`.** Vercel clones the repo
+  but builds only from there, so `.claude/`, `docs/`, and other
+  repo-root files are excluded from the deployment by construction.
+- **Run app commands from inside the app dir:** `cd salone-explorer`
+  before `npm run ...`. CI workflows set `working-directory: salone-explorer`.
+- **Path convention:** `src/...` paths in this file and the rules are
+  relative to `salone-explorer/`. Harness checks that run from the repo
+  root (e.g. the three-layer grep in `verification-loop`) `cd salone-explorer`
+  first, or target `salone-explorer/src/...`.
+
+## AI harness (`.claude/`)
+
+This repo ships an AI-led SDLC harness: subagents, governance hooks,
+rules, skills, and slash commands. Full reference: `docs/dev-guide/claude-harness.md`.
+
+- **Rules** in `.claude/rules/` are loaded every session and are binding:
+  `three-layer-separation` (keystone), `engineering-principles`,
+  `spec-first`, `commit-conventions`, `branch-conventions`,
+  `test-conventions`, `api-conventions`, `80-20-split`.
+- **Sessions are mandatory** for development work: `/session-start` →
+  `/session-update` → `/session-end`. The session file is the durable
+  memory between sessions.
+- **Governance is enforced by hooks**: code-producing prompts must
+  reference a SPEC phase/section or a GitHub issue; commits need a
+  `Requirement:`/`Phase:`/`Incident:` trailer; new source files need a
+  one-line header; secrets, force-push, `reset --hard`, `--no-verify`,
+  and `gh pr merge` are hard-blocked.
+- **Tool-agnostic floor** (`.githooks/`): a `commit-msg` trailer gate and
+  a `pre-commit` secret-scan / new-file-header / three-layer grep run on
+  every commit regardless of which AI authored it. Install per clone with
+  `.claude/scripts/install-git-hooks.sh`. See
+  `docs/dev-guide/multi-tool-enforcement.md`.
+- **Activation** (one-time, human-only): move `.claude/settings.json.proposed`
+  to `.claude/settings.json` and copy `settings.local.json.template` to
+  `settings.local.json`, then restart Claude Code. Run
+  `.claude/scripts/install-git-hooks.sh` to wire the git-hook floor.
+
 ## Non-negotiable architectural rules
 
 These are the rules most likely to be violated by an AI agent and cause the most damage. They come from `SPEC.md` §5 and §22.
@@ -57,7 +112,7 @@ When adding any new domain type, define the interface first, add the file-based 
 
 ## Commands (post-scaffold)
 
-These commands are defined in `SPEC.md` §18 and will be wired in `package.json` once Phase 1 scaffolding is complete. They do not work until then.
+These commands are defined in `SPEC.md` §18 and will be wired in `package.json` once Phase 1 scaffolding is complete. They do not work until then. Run them from the app directory: `cd salone-explorer` first.
 
 | Command                       | Purpose                                                              |
 | ----------------------------- | -------------------------------------------------------------------- |
@@ -69,17 +124,17 @@ These commands are defined in `SPEC.md` §18 and will be wired in `package.json`
 | `npm run test:a11y`           | Playwright + `@axe-core/playwright` smoke across five routes.        |
 | `npm run migrate:attractions` | Phase 2.5: upsert `src/data/attractions.json` into Supabase.         |
 
-Run a single Playwright spec with `npx playwright test tests/a11y/smoke.spec.ts -g "name of test"`.
+Run a single Playwright spec with `npx playwright test tests/a11y/smoke.spec.ts -g "name of test"` (from `salone-explorer/`).
 
 Node 20+ required.
 
 ## Branching and CI
 
-Merges to `main` require four workflows green: `ci.yml`, `codeql.yml`, `security.yml`, `a11y.yml`. The a11y workflow fails on serious or critical axe violations on `/`, `/attractions/tiwai-island`, `/about`, `/signin`, `/signup`.
+Merges to `main` require four workflows green: `ci.yml`, `codeql.yml`, `security.yml`, `a11y.yml`. The a11y workflow fails on serious or critical axe violations on `/`, `/attractions/tiwai-island`, `/about`, `/signin`, `/signup`. All four run with `working-directory: salone-explorer` (the app subdirectory).
 
 ## Phase 2 (Supabase) preconditions
 
-Before touching auth or any user-scoped feature, Supabase must be provisioned and `supabase/schema.sql` (from `SPEC.md` §6.3) applied. Every user-scoped table — `profiles`, `saved_attractions`, `tour_bookings` — has RLS enabled with `auth.uid() = user_id` policies. Never add a new user-scoped table without an RLS policy in the same migration.
+Before touching auth or any user-scoped feature, Supabase must be provisioned and `salone-explorer/supabase/schema.sql` (from `SPEC.md` §6.3) applied. Every user-scoped table — `profiles`, `saved_attractions`, `tour_bookings` — has RLS enabled with `auth.uid() = user_id` policies. Never add a new user-scoped table without an RLS policy in the same migration.
 
 ## Branding constants
 
