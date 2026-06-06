@@ -2,7 +2,9 @@
 // and upserts each record into public.attractions. Runs server-side with the
 // service-role key (bypasses RLS) - the key is read from the environment and
 // never committed or VITE_-prefixed. Idempotent: re-running upserts by id.
-import { readFileSync } from 'node:fs';
+// Credentials come from the shell environment, or from the gitignored
+// .env.local as a fallback for convenience (loaded below).
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
@@ -10,6 +12,20 @@ import type { Attraction } from '../src/data/types';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(here, '..');
+
+// Convenience for local runs: when the service-role key is not already in the
+// shell, load it from the gitignored .env.local. This is a server-side script
+// (not the client bundle), and the key is non-VITE_, so Vite never exposes it
+// to the browser. Shell-provided values still win. Requires Node >= 20.12
+// (process.loadEnvFile); the app targets Node 20+.
+const envLocal = resolve(appRoot, '.env.local');
+if (
+  !process.env.SUPABASE_SERVICE_ROLE_KEY &&
+  typeof process.loadEnvFile === 'function' &&
+  existsSync(envLocal)
+) {
+  process.loadEnvFile(envLocal);
+}
 
 // Server-side context: prefer the unprefixed SUPABASE_URL; fall back to the
 // VITE_ one for convenience. The service-role key is never VITE_-prefixed.
