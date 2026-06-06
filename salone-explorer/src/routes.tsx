@@ -12,7 +12,9 @@ import {
 import { AboutPage, aboutLoader } from '@/pages/AboutPage';
 import { SignInPage } from '@/pages/SignInPage';
 import { SignUpPage } from '@/pages/SignUpPage';
+import { AccountPage } from '@/pages/AccountPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 export const routes: RouteObject[] = [
   {
@@ -29,6 +31,16 @@ export const routes: RouteObject[] = [
       { path: 'about', element: <AboutPage />, loader: aboutLoader },
       { path: 'signin', element: <SignInPage /> },
       { path: 'signup', element: <SignUpPage /> },
+      {
+        // Client-only protected route; intentionally excluded from the
+        // prerender list (scripts/prerender.ts) since it requires a session.
+        path: 'account',
+        element: (
+          <ProtectedRoute>
+            <AccountPage />
+          </ProtectedRoute>
+        ),
+      },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

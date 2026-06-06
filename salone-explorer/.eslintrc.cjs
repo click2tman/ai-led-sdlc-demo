@@ -14,7 +14,7 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
   ],
-  ignorePatterns: ['dist', 'node_modules', 'coverage', '*.cjs', 'vite.config.ts'],
+  ignorePatterns: ['dist', 'dist-ssr', 'node_modules', 'coverage', '*.cjs', 'vite.config.ts'],
   rules: {
     // Off by design: react-router's data-router pattern co-locates `loader`
     // exports with route components, and cva variants live beside their
