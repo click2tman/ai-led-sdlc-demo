@@ -69,11 +69,13 @@
   "schedule.validation.dateRequired": "Choose a tour date.",
   "schedule.validation.datePast": "Choose a date in the future.",
   "schedule.validation.partyRange": "Party size must be between 1 and 20.",
+  "schedule.validation.notesLength": "Notes must be 500 characters or fewer.",
 
   "auth.signin.title": "Sign in",
   "auth.signin.subtitle": "Sign in to save attractions and schedule tours.",
   "auth.signup.title": "Create an account",
   "auth.signup.subtitle": "Create an account to save attractions and schedule tours.",
+  "auth.signup.checkEmail": "Account created. Check your email to confirm your address, then sign in.",
   "auth.field.email": "Email address",
   "auth.field.password": "Password",
   "auth.field.displayName": "Display name",
@@ -102,6 +104,9 @@
   "account.tours.date": "Date",
   "account.tours.party": "Party size",
   "account.tours.status": "Status",
+  "account.tours.status.pending": "Pending",
+  "account.tours.status.confirmed": "Confirmed",
+  "account.tours.status.cancelled": "Cancelled",
   "account.tours.cancel": "Cancel tour",
   "account.tours.cancelled": "Tour cancelled.",
   "account.remove": "Remove",
@@ -156,5 +161,6 @@
   "errors.auth.weakPassword": "Choose a stronger password of at least 8 characters.",
   "errors.auth.emailInvalid": "Enter a valid email address.",
   "errors.auth.required": "Enter your email and password.",
+  "errors.auth.rateLimit": "Too many attempts. Please wait a minute and try again.",
   "errors.auth.generic": "We could not sign you in. Please try again."
 }
