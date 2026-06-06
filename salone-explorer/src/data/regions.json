@@ -1,0 +1,18 @@
+[
+  { "district": "Bo", "province": "Southern" },
+  { "district": "Bonthe", "province": "Southern" },
+  { "district": "Moyamba", "province": "Southern" },
+  { "district": "Pujehun", "province": "Southern" },
+  { "district": "Bombali", "province": "Northern" },
+  { "district": "Falaba", "province": "Northern" },
+  { "district": "Koinadugu", "province": "Northern" },
+  { "district": "Tonkolili", "province": "Northern" },
+  { "district": "Karene", "province": "North West" },
+  { "district": "Kambia", "province": "North West" },
+  { "district": "Port Loko", "province": "North West" },
+  { "district": "Kailahun", "province": "Eastern" },
+  { "district": "Kenema", "province": "Eastern" },
+  { "district": "Kono", "province": "Eastern" },
+  { "district": "Western Area Urban", "province": "Western Area" },
+  { "district": "Western Area Rural", "province": "Western Area" }
+]
