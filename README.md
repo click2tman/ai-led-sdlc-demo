@@ -185,9 +185,13 @@ Migrate to Payload CMS. See [Migrating to Payload CMS](#migrating-to-payload-cms
 
 ```bash
 git clone git@github.com:click2tman/ai-led-sdlc-demo.git
-cd ai-led-sdlc-demo
+cd ai-led-sdlc-demo/salone-explorer   # the Vite app lives in this subdirectory
 npm install
 ```
+
+All commands in the steps below run from the `salone-explorer/` app
+directory (see [Project structure](#project-structure)); the repo root
+holds only the spec, docs, and the `.claude/` harness.
 
 ### Configure environment
 
@@ -520,8 +524,8 @@ Full criteria in `SPEC.md` §20.
 
 This repo is a teaching artefact. External contributions are not expected, but the workflow is standard:
 
-1. Branch from `main`.
-2. Run `npm run lint`, `npm run typecheck`, `npm run build`, `npm run test:a11y`.
+1. Branch from `dev` (see [`.claude/rules/branch-conventions.md`](./.claude/rules/branch-conventions.md)); `main` is promotion-only.
+2. From `salone-explorer/`, run `npm run lint`, `npm run typecheck`, `npm run build`, `npm run test:a11y`.
 3. **Do not add English strings to `.tsx`/`.ts` files** — add to `src/content/strings.en.json`.
 4. **Do not add attraction facts to `.tsx`/`.ts` files** — add to `src/data/attractions.json`.
 5. Open a PR — CI, CodeQL, Security, A11y must pass before merge.

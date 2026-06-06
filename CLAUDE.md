@@ -59,9 +59,15 @@ rules, skills, and slash commands. Full reference: `docs/dev-guide/claude-harnes
   `Requirement:`/`Phase:`/`Incident:` trailer; new source files need a
   one-line header; secrets, force-push, `reset --hard`, `--no-verify`,
   and `gh pr merge` are hard-blocked.
+- **Tool-agnostic floor** (`.githooks/`): a `commit-msg` trailer gate and
+  a `pre-commit` secret-scan / new-file-header / three-layer grep run on
+  every commit regardless of which AI authored it. Install per clone with
+  `.claude/scripts/install-git-hooks.sh`. See
+  `docs/dev-guide/multi-tool-enforcement.md`.
 - **Activation** (one-time, human-only): move `.claude/settings.json.proposed`
   to `.claude/settings.json` and copy `settings.local.json.template` to
-  `settings.local.json`, then restart Claude Code.
+  `settings.local.json`, then restart Claude Code. Run
+  `.claude/scripts/install-git-hooks.sh` to wire the git-hook floor.
 
 ## Non-negotiable architectural rules
 
@@ -128,7 +134,7 @@ Merges to `main` require four workflows green: `ci.yml`, `codeql.yml`, `security
 
 ## Phase 2 (Supabase) preconditions
 
-Before touching auth or any user-scoped feature, Supabase must be provisioned and `supabase/schema.sql` (from `SPEC.md` §6.3) applied. Every user-scoped table — `profiles`, `saved_attractions`, `tour_bookings` — has RLS enabled with `auth.uid() = user_id` policies. Never add a new user-scoped table without an RLS policy in the same migration.
+Before touching auth or any user-scoped feature, Supabase must be provisioned and `salone-explorer/supabase/schema.sql` (from `SPEC.md` §6.3) applied. Every user-scoped table — `profiles`, `saved_attractions`, `tour_bookings` — has RLS enabled with `auth.uid() = user_id` policies. Never add a new user-scoped table without an RLS policy in the same migration.
 
 ## Branding constants
 
