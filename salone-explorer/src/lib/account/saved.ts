@@ -1,8 +1,9 @@
 // SavedAttractionRepository contract + Supabase implementation (SPEC §6.3,
 // §9.5). Bookmarks and favorites are user-scoped rows in
-// public.saved_attractions, protected by RLS (auth.uid() = user_id), so the
-// repository never filters by user_id itself - the session and RLS do. This
-// data only exists in Supabase, so there is no file implementation.
+// public.saved_attractions. RLS (auth.uid() = user_id) is the primary guard;
+// reads rely on it, while writes (add/remove) also set/filter user_id
+// explicitly from the session as defense in depth, so a weakened policy can
+// never widen them. This data only exists in Supabase - no file implementation.
 import { getSupabase } from '@/lib/supabase';
 import type { SavedAttraction, SavedKind } from './types';
 

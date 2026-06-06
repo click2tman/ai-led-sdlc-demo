@@ -51,6 +51,9 @@ export function AccountPage() {
   const load = useCallback(async () => {
     setLoading(true);
     setError(false);
+    // Clear any prior action error so a successful reload does not leave a
+    // stale banner behind.
+    setActionError(false);
     try {
       const [all, bookmarkRows, favoriteRows, tourRows] = await Promise.all([
         attractions.getAll(),
@@ -236,6 +239,7 @@ function SavedSection({
                 <button
                   type="button"
                   onClick={() => void onRemove(row.attractionId)}
+                  aria-label={`${t('account.remove')}: ${attraction?.name ?? row.attractionId}`}
                   className="inline-flex min-h-[44px] items-center px-3 text-sm text-text-muted hover:text-danger"
                 >
                   {t('account.remove')}
@@ -295,6 +299,7 @@ function ToursSection({
                   <button
                     type="button"
                     onClick={() => void onCancel(tour.id)}
+                    aria-label={`${t('account.tours.cancel')}: ${attraction?.name ?? tour.attractionId} ${tour.tourDate}`}
                     className="inline-flex min-h-[44px] items-center px-3 text-sm text-text-muted hover:text-danger"
                   >
                     {t('account.tours.cancel')}

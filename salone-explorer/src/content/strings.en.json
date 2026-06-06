@@ -75,6 +75,7 @@
   "auth.signin.subtitle": "Sign in to save attractions and schedule tours.",
   "auth.signup.title": "Create an account",
   "auth.signup.subtitle": "Create an account to save attractions and schedule tours.",
+  "auth.signup.checkEmail": "Account created. Check your email to confirm your address, then sign in.",
   "auth.field.email": "Email address",
   "auth.field.password": "Password",
   "auth.field.displayName": "Display name",

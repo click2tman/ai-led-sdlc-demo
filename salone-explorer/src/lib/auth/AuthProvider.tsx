@@ -27,10 +27,23 @@ type AuthContextValue = {
   loading: boolean;
   /** Whether Supabase auth is configured in this environment. */
   configured: boolean;
-  /** Sign in with email + password. Throws on failure. */
-  signIn(email: string, password: string): Promise<void>;
-  /** Register with email + password; displayName is stored as user metadata. */
-  signUp(email: string, password: string, displayName: string): Promise<void>;
+  /**
+   * Sign in with email + password. Throws on failure. Returns the new
+   * session (always present on success) after seeding it into state so the
+   * caller can navigate without racing onAuthStateChange.
+   */
+  signIn(email: string, password: string): Promise<Session>;
+  /**
+   * Register with email + password; displayName is stored as user metadata.
+   * Returns the session, or null when email confirmation is required (no
+   * session yet) so the caller can show a "check your email" notice instead
+   * of navigating into a protected route and bouncing back to /signin.
+   */
+  signUp(
+    email: string,
+    password: string,
+    displayName: string,
+  ): Promise<Session | null>;
   /** Begin an OAuth redirect flow for the given provider. */
   signInWithOAuth(provider: OAuthProvider): Promise<void>;
   /** Sign out and clear the local session. */
@@ -95,21 +108,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [configured]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await getSupabase().auth.signInWithPassword({
+    const { data, error } = await getSupabase().auth.signInWithPassword({
       email,
       password,
     });
     if (error) throw error;
+    // Seed the session synchronously so a caller that navigates right away
+    // sees user !== null before onAuthStateChange would otherwise fire.
+    setSession(data.session);
+    return data.session;
   }, []);
 
   const signUp = useCallback(
     async (email: string, password: string, displayName: string) => {
-      const { error } = await getSupabase().auth.signUp({
+      const { data, error } = await getSupabase().auth.signUp({
         email,
         password,
         options: { data: { display_name: displayName } },
       });
       if (error) throw error;
+      // data.session is null when email confirmation is required; only seed
+      // state when a session actually exists.
+      if (data.session) setSession(data.session);
+      return data.session;
     },
     [],
   );

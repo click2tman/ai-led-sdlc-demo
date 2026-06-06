@@ -22,11 +22,13 @@ export function AuthForm({ mode }: AuthFormProps) {
   const navigate = useNavigate();
   const { signIn, signUp, configured } = useAuth();
   const [errorKey, setErrorKey] = useState<StringKey | null>(null);
+  const [noticeKey, setNoticeKey] = useState<StringKey | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorKey(null);
+    setNoticeKey(null);
 
     if (!configured) {
       setErrorKey('auth.notEnabled');
@@ -40,13 +42,17 @@ export function AuthForm({ mode }: AuthFormProps) {
 
     setSubmitting(true);
     try {
-      if (isSignup) {
-        await signUp(email, password, displayName);
-      } else {
-        await signIn(email, password);
+      const session = isSignup
+        ? await signUp(email, password, displayName)
+        : await signIn(email, password);
+      // signUp returns null when email confirmation is required: there is no
+      // session yet, so navigating to /account would bounce back to /signin.
+      // Show a confirmation notice instead. With confirm-email disabled
+      // (SPEC §19 P5) a session is always present and we navigate.
+      if (!session) {
+        setNoticeKey('auth.signup.checkEmail');
+        return;
       }
-      // Email confirmation is disabled (SPEC §19 P5), so a session exists on
-      // success; the AuthProvider picks it up and /account is reachable.
       navigate('/account');
     } catch (error) {
       setErrorKey(mapAuthError(error));
@@ -110,6 +116,12 @@ export function AuthForm({ mode }: AuthFormProps) {
         {errorKey && (
           <p role="alert" className="text-sm text-danger">
             {t(errorKey)}
+          </p>
+        )}
+
+        {noticeKey && (
+          <p role="status" className="text-sm text-text-muted">
+            {t(noticeKey)}
           </p>
         )}
       </form>
