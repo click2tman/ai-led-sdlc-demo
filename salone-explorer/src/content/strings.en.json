@@ -39,6 +39,8 @@
   "attraction.rating.reviews": "reviews",
   "attraction.tags.label": "Tags",
   "attraction.gallery.label": "Photo gallery",
+  "attraction.image.creditPrefix": "Photo",
+  "attraction.image.creditVia": "via Wikimedia Commons",
   "attraction.video.label": "Video",
   "attraction.directions.cta": "Get directions",
   "attraction.directions.ariaSuffix": "opens Google Maps in a new tab",

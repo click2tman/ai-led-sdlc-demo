@@ -4,7 +4,7 @@
 // marked data-speakable for AEO (§13.3). Facts come from the record; all
 // labels come from the content layer.
 import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router-dom';
-import { attractions, t } from '@/lib/content';
+import { attractions, t, getImageCredit } from '@/lib/content';
 import type { Attraction } from '@/data/types';
 import { attractionPath } from '@/lib/site';
 import { SeoHead } from '@/seo/SeoHead';
@@ -50,6 +50,7 @@ export function AttractionDetailPage() {
   if (!attraction) return <NotFound />;
 
   const paragraphs = attraction.longDescription.split('\n\n');
+  const credit = getImageCredit(attraction.id);
 
   return (
     <>
@@ -113,6 +114,32 @@ export function AttractionDetailPage() {
               </li>
             ))}
           </ul>
+          {credit && (
+            <p className="mt-2 text-xs text-text-muted">
+              {t('attraction.image.creditPrefix')}:{' '}
+              <a
+                href={credit.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:no-underline"
+              >
+                {credit.author}
+              </a>{' '}
+              {credit.licenseUrl ? (
+                <a
+                  href={credit.licenseUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 hover:no-underline"
+                >
+                  ({credit.license})
+                </a>
+              ) : (
+                <span>({credit.license})</span>
+              )}{' '}
+              {t('attraction.image.creditVia')}
+            </p>
+          )}
         </section>
 
         <div className="grid gap-8 md:grid-cols-[2fr,1fr]">

@@ -18,10 +18,13 @@
     "rating": 4.7,
     "reviewCount": 128,
     "images": [
-      "/images/attractions/tiwai-island-1.svg",
-      "/images/attractions/tiwai-island-2.svg"
+      "/images/attractions/tiwai-island.webp"
     ],
-    "tags": ["wildlife", "ecotourism", "island"],
+    "tags": [
+      "wildlife",
+      "ecotourism",
+      "island"
+    ],
     "sources": [
       "https://ntb.gov.sl/",
       "https://www.visitsierraleone.org/"
@@ -57,10 +60,13 @@
     "rating": 4.6,
     "reviewCount": 210,
     "images": [
-      "/images/attractions/river-no-2-beach-1.svg",
-      "/images/attractions/river-no-2-beach-2.svg"
+      "/images/attractions/river-no-2-beach.webp"
     ],
-    "tags": ["beach", "swimming", "family"],
+    "tags": [
+      "beach",
+      "swimming",
+      "family"
+    ],
     "sources": [
       "https://tourismsierraleone.com/",
       "https://www.visitsierraleone.org/"
@@ -96,10 +102,13 @@
     "rating": 4.8,
     "reviewCount": 96,
     "images": [
-      "/images/attractions/bunce-island-1.svg",
-      "/images/attractions/bunce-island-2.svg"
+      "/images/attractions/bunce-island.webp"
     ],
-    "tags": ["history", "heritage", "slave-trade"],
+    "tags": [
+      "history",
+      "heritage",
+      "slave-trade"
+    ],
     "sources": [
       "https://www.sierraleoneheritage.org/museum",
       "https://ntb.gov.sl/"
@@ -135,10 +144,13 @@
     "rating": 4.8,
     "reviewCount": 342,
     "images": [
-      "/images/attractions/tacugama-chimpanzee-sanctuary-1.svg",
-      "/images/attractions/tacugama-chimpanzee-sanctuary-2.svg"
+      "/images/attractions/tacugama-chimpanzee-sanctuary.webp"
     ],
-    "tags": ["wildlife", "conservation", "primates"],
+    "tags": [
+      "wildlife",
+      "conservation",
+      "primates"
+    ],
     "sources": [
       "https://www.visitsierraleone.org/",
       "https://tourismsierraleone.com/"
@@ -174,10 +186,13 @@
     "rating": 4.3,
     "reviewCount": 87,
     "images": [
-      "/images/attractions/sierra-leone-national-museum-1.svg",
-      "/images/attractions/sierra-leone-national-museum-2.svg"
+      "/images/attractions/sierra-leone-national-museum.webp"
     ],
-    "tags": ["history", "culture", "museum"],
+    "tags": [
+      "history",
+      "culture",
+      "museum"
+    ],
     "sources": [
       "https://www.sierraleoneheritage.org/museum",
       "https://ntb.gov.sl/"
@@ -213,10 +228,13 @@
     "rating": 4.6,
     "reviewCount": 74,
     "images": [
-      "/images/attractions/banana-islands-1.svg",
-      "/images/attractions/banana-islands-2.svg"
+      "/images/attractions/banana-islands.webp"
     ],
-    "tags": ["island", "snorkeling", "history"],
+    "tags": [
+      "island",
+      "snorkeling",
+      "history"
+    ],
     "sources": [
       "https://www.visitsierraleone.org/",
       "https://tourismsierraleone.com/"
@@ -252,10 +270,13 @@
     "rating": 4.4,
     "reviewCount": 41,
     "images": [
-      "/images/attractions/outamba-kilimi-national-park-1.svg",
-      "/images/attractions/outamba-kilimi-national-park-2.svg"
+      "/images/attractions/outamba-kilimi-national-park.webp"
     ],
-    "tags": ["safari", "hippos", "elephants"],
+    "tags": [
+      "safari",
+      "hippos",
+      "elephants"
+    ],
     "sources": [
       "https://ntb.gov.sl/",
       "https://www.visitsierraleone.org/"
@@ -291,10 +312,13 @@
     "rating": 4.7,
     "reviewCount": 53,
     "images": [
-      "/images/attractions/mount-bintumani-1.svg",
-      "/images/attractions/mount-bintumani-2.svg"
+      "/images/attractions/mount-bintumani.webp"
     ],
-    "tags": ["hiking", "mountain", "biodiversity"],
+    "tags": [
+      "hiking",
+      "mountain",
+      "biodiversity"
+    ],
     "sources": [
       "https://www.visitsierraleone.org/",
       "https://sierra-leone.org/"

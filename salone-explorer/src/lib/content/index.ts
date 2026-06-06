@@ -32,3 +32,5 @@ export const attractions: AttractionRepository = selectRepository();
 export { t } from './strings';
 export type { StringKey } from './strings';
 export type { AttractionRepository } from './attractions';
+export { getImageCredit } from './image-credits';
+export type { ImageCredit } from './image-credits';
