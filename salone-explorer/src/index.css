@@ -1,0 +1,64 @@
+/* Global stylesheet: imports design tokens then Tailwind layers.
+   Base layer sets body type/colour from tokens and a visible focus ring
+   (WCAG 2.2 AA 2.4.7 / 2.4.13). */
+@import './styles/tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--fs-16);
+    line-height: var(--lh-normal);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    line-height: var(--lh-tight);
+  }
+
+  /* 2.4.7 Focus visible + 2.4.13 focus appearance: >= 2px, >= 3:1 ring. */
+  :focus-visible {
+    outline: 3px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  [role='button'] {
+    touch-action: manipulation;
+  }
+}
+
+/* Skip link revealed on focus (keyboard users land on main content). */
+.skip-link {
+  position: absolute;
+  left: var(--sp-2);
+  top: var(--sp-2);
+  z-index: 50;
+  transform: translateY(-200%);
+  background: var(--color-bg);
+  color: var(--color-brand-primary);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
