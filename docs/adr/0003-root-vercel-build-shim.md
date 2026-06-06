@@ -45,3 +45,17 @@ confirmed to support `npx playwright install`.
 - `.claude/` and `docs/` are part of the build's source checkout but never
   served (only `outputDirectory` is published).
 - This is the maintainer-authorised deviation from SPEC §12.
+
+## Amendment (2026-06-06): routes config, SSG build, config alignment
+
+- The rewrites-based SPA fallback did not serve `index.html` for client
+  routes on this `framework: null` project. Both `vercel.json` files now use
+  the legacy `routes` config (a header route with `continue`, the
+  `filesystem` handle, then `/.* -> /index.html`), which is
+  framework-independent and serves the nested prerendered files.
+- The root build command is `cd salone-explorer && npm run build:prerender`
+  (browser-free SSG, ADR 0002 amendment) — no Chromium on the build image.
+- The two configs are aligned: identical `routes`/headers; the root file
+  additionally carries the build shim (install/build/outputDirectory). The
+  app-level file is the form used if the dashboard Root Directory is later
+  set to `salone-explorer`.
