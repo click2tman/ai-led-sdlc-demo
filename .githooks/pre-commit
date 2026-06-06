@@ -48,7 +48,10 @@ for path in ${added[@]+"${added[@]}"}; do
     *.ts|*.tsx|*.js|*.jsx|*.sh|*.py|*.sql) ;;
     *) continue ;;
   esac
-  first_line="$(awk 'NF{print; exit}' "$REPO_ROOT/$path" 2>/dev/null || true)"
+  # Read the staged blob (the index), not the working tree, so the gate
+  # validates exactly what is about to be committed.
+  first_line="$(git -C "$REPO_ROOT" show ":$path" 2>/dev/null \
+    | awk 'NF{print; exit}' || true)"
   case "$first_line" in
     '#'*|'//'*|'/*'*|'"""'*) ;;
     *)
@@ -69,24 +72,29 @@ for path in ${staged[@]+"${staged[@]}"}; do
       case "$path" in
         "$APP_SRC_PREFIX"/lib/content/*) continue ;;
       esac
-      [ -f "$REPO_ROOT/$path" ] && code_layer+=("$REPO_ROOT/$path") ;;
+      # Repo-relative path; the scan runs against the staged blob via
+      # `git grep --cached`, not the working-tree file.
+      code_layer+=("$path") ;;
   esac
 done
 
 if [ "${#code_layer[@]}" -gt 0 ]; then
+  # Scan staged content (the index), not the working tree, so the gate
+  # matches exactly what is about to be committed. `git grep --cached`
+  # exits 0 when it finds a match and 1 when it does not.
   # (a) Hard-coded English UI strings or known attraction names.
-  if hits="$(grep -rnE '"[A-Z][a-z]+( [A-Za-z]+){1,}"' "${code_layer[@]}" 2>/dev/null)"; then
+  if hits="$(git -C "$REPO_ROOT" grep --cached -nE '"[A-Z][a-z]+( [A-Za-z]+){1,}"' -- "${code_layer[@]}" 2>/dev/null)"; then
     >&2 echo "[blocked] three-layer (a): hard-coded English string in the code layer"
     >&2 echo "$hits"
     fail=1
   fi
-  if hits="$(grep -rnEi 'Tiwai Island|Bunce Island|River No\. ?2|Freetown|Banana Island|Outamba' "${code_layer[@]}" 2>/dev/null)"; then
+  if hits="$(git -C "$REPO_ROOT" grep --cached -nEi 'Tiwai Island|Bunce Island|River No\. ?2|Freetown|Banana Island|Outamba' -- "${code_layer[@]}" 2>/dev/null)"; then
     >&2 echo "[blocked] three-layer (a): hard-coded attraction name in the code layer"
     >&2 echo "$hits"
     fail=1
   fi
   # (b) Direct src/data/*.json imports (must go through the barrel).
-  if hits="$(grep -rnE "from ['\"].*/data/.*\.json['\"]|import .*['\"].*/data/.*\.json['\"]" "${code_layer[@]}" 2>/dev/null)"; then
+  if hits="$(git -C "$REPO_ROOT" grep --cached -nE "from ['\"].*/data/.*\.json['\"]|import .*['\"].*/data/.*\.json['\"]" -- "${code_layer[@]}" 2>/dev/null)"; then
     >&2 echo "[blocked] three-layer (b): direct data import bypasses the repository barrel"
     >&2 echo "$hits"
     fail=1
