@@ -160,5 +160,6 @@
   "errors.auth.weakPassword": "Choose a stronger password of at least 8 characters.",
   "errors.auth.emailInvalid": "Enter a valid email address.",
   "errors.auth.required": "Enter your email and password.",
+  "errors.auth.rateLimit": "Too many attempts. Please wait a minute and try again.",
   "errors.auth.generic": "We could not sign you in. Please try again."
 }

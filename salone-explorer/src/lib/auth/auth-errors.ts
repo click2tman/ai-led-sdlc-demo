@@ -14,6 +14,25 @@ import type { StringKey } from '@/lib/content';
 export function mapAuthError(error: unknown): StringKey {
   const message = (error instanceof Error ? error.message : String(error))
     .toLowerCase();
+  // Supabase AuthApiError also carries a stable `code` string and HTTP
+  // `status`; read them defensively for cases the message wording is vague on.
+  const record =
+    typeof error === 'object' && error !== null
+      ? (error as Record<string, unknown>)
+      : {};
+  const code = typeof record.code === 'string' ? record.code.toLowerCase() : '';
+  const status = typeof record.status === 'number' ? record.status : 0;
+
+  // Rate limiting (e.g. over_email_send_rate_limit / HTTP 429): tell the user
+  // to wait rather than implying their credentials were wrong.
+  if (
+    status === 429 ||
+    code.includes('rate_limit') ||
+    message.includes('rate limit') ||
+    message.includes('too many requests')
+  ) {
+    return 'errors.auth.rateLimit';
+  }
 
   if (message.includes('invalid login credentials')) {
     return 'errors.auth.invalidCredentials';

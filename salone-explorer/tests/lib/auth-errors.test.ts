@@ -29,6 +29,19 @@ describe('mapAuthError', () => {
     );
   });
 
+  it('maps a rate-limit error by Supabase code', () => {
+    const err = Object.assign(new Error('email rate limit exceeded'), {
+      code: 'over_email_send_rate_limit',
+      status: 429,
+    });
+    expect(mapAuthError(err)).toBe('errors.auth.rateLimit');
+  });
+
+  it('maps a 429 status with an unhelpful message', () => {
+    const err = Object.assign(new Error('Request failed'), { status: 429 });
+    expect(mapAuthError(err)).toBe('errors.auth.rateLimit');
+  });
+
   it('falls back to generic for an unknown error', () => {
     expect(mapAuthError(new Error('some unexpected failure'))).toBe(
       'errors.auth.generic',
