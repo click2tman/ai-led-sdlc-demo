@@ -31,11 +31,21 @@ const entries: SitemapEntry[] = [
   })),
 ];
 
+/** Escape XML metacharacters so a malformed path cannot break the document. */
+function xmlEscape(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
 function buildSitemap(): string {
   const urls = entries
     .map(
       (e) =>
-        `  <url>\n    <loc>${siteUrl}${e.path}</loc>\n    <lastmod>${e.lastmod}</lastmod>\n    <priority>${e.priority}</priority>\n  </url>`,
+        `  <url>\n    <loc>${xmlEscape(siteUrl + e.path)}</loc>\n    <lastmod>${e.lastmod}</lastmod>\n    <priority>${e.priority}</priority>\n  </url>`,
     )
     .join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;

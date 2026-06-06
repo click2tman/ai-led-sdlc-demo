@@ -62,7 +62,7 @@ export function NavBar() {
       {open && (
         <nav
           id="mobile-menu"
-          aria-label={t('nav.primaryLabel')}
+          aria-label={t('nav.primaryLabelMobile')}
           className="border-t border-border md:hidden"
         >
           <ul className="mx-auto flex max-w-6xl flex-col px-4 py-2">

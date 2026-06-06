@@ -214,7 +214,6 @@ export function attractionGraph(attraction: Attraction): JsonLdNode {
       description: attraction.shortDescription,
       breadcrumbItems: [
         { name: t('nav.home'), path: '/' },
-        { name: t('attraction.breadcrumb.attractions'), path: '/' },
         { name: attraction.name, path: attractionPath(attraction.id) },
       ],
     }),

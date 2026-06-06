@@ -71,12 +71,6 @@ export function AttractionDetailPage() {
               </Link>
             </li>
             <li aria-hidden="true">/</li>
-            <li>
-              <Link to="/" className="hover:underline">
-                {t('attraction.breadcrumb.attractions')}
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
             <li aria-current="page" className="text-text">
               {attraction.name}
             </li>
@@ -110,7 +104,7 @@ export function AttractionDetailPage() {
               >
                 <img
                   src={src}
-                  alt={`${attraction.name} - ${index + 1}`}
+                  alt={index === 0 ? attraction.name : ''}
                   width={640}
                   height={360}
                   className="h-full w-full rounded-lg object-cover"

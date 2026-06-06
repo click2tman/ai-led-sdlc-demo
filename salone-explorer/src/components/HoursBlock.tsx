@@ -26,7 +26,7 @@ export function HoursBlock({ hours }: HoursBlockProps) {
       <dl className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
         <dt className="text-text-muted">{t('attraction.openingHours.days')}</dt>
         <dd>{hours.daysOpen}</dd>
-        <dt className="text-text-muted">{t('attraction.openingHours')}</dt>
+        <dt className="text-text-muted">{t('attraction.openingHours.time')}</dt>
         <dd>
           {hours.open} - {hours.close}
         </dd>

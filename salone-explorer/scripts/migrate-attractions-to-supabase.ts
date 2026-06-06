@@ -11,11 +11,13 @@ import type { Attraction } from '../src/data/types';
 const here = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(here, '..');
 
-const url = process.env.VITE_SUPABASE_URL;
+// Server-side context: prefer the unprefixed SUPABASE_URL; fall back to the
+// VITE_ one for convenience. The service-role key is never VITE_-prefixed.
+const url = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!url || !serviceRoleKey) {
   throw new Error(
-    'Set VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your shell ' +
+    'Set SUPABASE_URL (or VITE_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY ' +
       'before running the migration. The service-role key must never be ' +
       'committed or exposed to the browser.',
   );

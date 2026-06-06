@@ -8,12 +8,15 @@ import { t } from '@/lib/content';
 const STORAGE_KEY = 'salone-explorer:disclaimer-dismissed';
 
 export function DisclaimerBanner() {
-  const [dismissed, setDismissed] = useState(true);
+  // Default visible so the prerendered/JS-disabled Home always carries the
+  // disclaimer (one of its three mandatory placements, §17). After mount,
+  // hide it only for returning visitors who explicitly dismissed it.
+  const [dismissed, setDismissed] = useState(false);
 
-  // Read persisted state after mount so prerendered HTML shows the banner
-  // and only hides it for returning visitors who dismissed it.
   useEffect(() => {
-    setDismissed(window.localStorage.getItem(STORAGE_KEY) === 'true');
+    if (window.localStorage.getItem(STORAGE_KEY) === 'true') {
+      setDismissed(true);
+    }
   }, []);
 
   if (dismissed) return null;

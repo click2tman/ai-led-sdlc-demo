@@ -14,9 +14,13 @@ const here = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(here, '..');
 const distDir = resolve(appRoot, 'dist');
 
-const attractions = JSON.parse(
+const parsed = JSON.parse(
   readFileSync(resolve(appRoot, 'src/data/attractions.json'), 'utf8'),
 ) as Attraction[];
+if (!Array.isArray(parsed) || parsed.some((a) => !/^[a-z0-9-]+$/.test(a.id))) {
+  throw new Error('prerender: attractions.json must be an array of records with kebab-case ids.');
+}
+const attractions = parsed;
 
 const routes: string[] = [
   '/',
