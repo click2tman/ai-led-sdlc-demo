@@ -210,15 +210,56 @@ PR on #11.
 Commits: d02d081 (prior session records), c29dd9e (Phase 6 feat),
 83c5c1b (review fixes), session record.
 
+### Ship to production (final, 2026-06-06)
+
+v2 is LIVE in production. Phases 5, 6, 7, and 2.5 are complete.
+
+- PR #37 (Phase 6) merged to dev; subsequent rounds added the rate-limit
+  error mapping (#37 follow-ups) and a second Copilot pass (#45: session-
+  loading guards on SaveButton/ScheduleTourModal, AuthForm required-field
+  guard, signOut rejection handling).
+- Phase 2.5 executed live: public.attractions migrated (8 rows via
+  npm run migrate:attractions), parity verified (file vs supabase identical,
+  arrays intact). PR #43 (migration reads .env.local) opened to dev.
+- Promotion #44 (dev -> main) merged; Vercel production deployed READY.
+  main tagged v2.0.0. Live site (slint-ai-led-sdlc.tpgroupsl.com) serves
+  all 8 attractions from Supabase, no errors, brand + disclaimer present.
+- Production cutover env set in Vercel (VITE_SUPABASE_URL/ANON_KEY,
+  VITE_ATTRACTIONS_SOURCE=supabase, VITE_SITE_URL) and prod domain added to
+  Supabase redirect URLs. Social login confirmed working in production.
+- Live acceptance (verified end-to-end, browser + prod): sign-up/in/out,
+  bookmark/favorite persistence, schedule + cancel tour, /account guard,
+  two-account RLS isolation, Google/Facebook/LinkedIn OAuth.
+- Issues closed: #1, #6, #7, #8, #9, #10, #11, #12, #13.
+
+Two known config issues surfaced during live bring-up were both Supabase
+dashboard settings, not code defects (Confirm-email was on -> 429; schema
+not applied -> PGRST205); the app surfaced each correctly and they were
+resolved by the maintainer.
+
 ## Next session
-Live local verification is DONE (all Phase 6/7 criteria green incl.
-two-account RLS). Remaining is human + production only:
-1. Human: review + merge PR #37 -> dev.
-2. Set VITE_SUPABASE_URL/ANON_KEY in the Vercel production env; redeploy;
-   confirm the deployed build runs the authenticated flow; tag main.
-3. Promote dev -> main.
-4. Optional follow-ups: cross-account RLS *integration* test in CI; map
-   over_email_send_rate_limit/429 to a clearer auth error key; DS Toast for
-   schedule.success; tour_bookings notes check constraint (needs an ADR).
-Note: salone-explorer/.env.local holds live anon creds (gitignored); the
-dev server may still be running on localhost:5173.
+v1 + v2 shipped. To fully sync the trunk, then pick the next phase:
+
+1. Sync main with dev (residual polish, already on dev or open to it):
+   - Merge PR #46 (dev -> main): the #45 auth-guard fixes are on dev but
+     not yet on main/production. Not an acceptance-criteria gap; UX polish.
+   - Merge PR #43 (chore -> dev): migration reads .env.local. Then it rides
+     the next promotion.
+   After #46 merges, re-deploy is automatic; re-tag if desired (v2.0.1).
+
+2. Open tracked work (no code yet):
+   - #38 Dependency triage: Group A (CI actions #20-22) safe to merge now;
+     Group C (React 19, ESLint flat-config, Vite 8) are coordinated upgrades.
+   - #39 cross-account RLS integration test; #40 DS Toast; #41 booking
+     confirm step; #42 notes check-constraint ADR.
+
+3. Next delivery phase (SPEC roadmap, post-v2 - pick one):
+   - #2 Phase 3 AEO (answer-engine optimisation) - low-risk, enhances
+     existing pages.
+   - #3 Phase 9 real-time reviews (Supabase Realtime + reviews table + RLS).
+   - #4 Phase 10 email notifications (Supabase Edge Functions).
+   - #5 Phase 11 payments (Stripe via Edge Functions).
+   - Phase 8 Payload CMS (architectural endpoint; out of class scope).
+
+Note: salone-explorer/.env.local holds live anon + service-role creds
+(gitignored). The local dev server may still be running on localhost:5173.
