@@ -35,5 +35,8 @@ __pycache__/
 # ARE the durable memory and stay tracked).
 .claude/sessions/.current-session
 .claude/sessions/*.log
+# Transient Copilot-review watch artifacts (regenerated per PR by
+# .claude/scripts/copilot-review.sh; not durable memory).
+.claude/sessions/copilot-review-*.json
 # Tool-call + transcript observability (machine-local, high churn).
 .claude/observability/

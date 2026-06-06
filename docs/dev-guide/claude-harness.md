@@ -78,7 +78,8 @@ attraction data and copy against the five approved sources; run it before
 ### Scripts (`.claude/scripts/`)
 
 `statusline.sh`, `scan-secrets.sh` (+ allowlist), `log-tool-call.sh`,
-`resume-context.py`.
+`resume-context.py`, `copilot-review.sh` (Copilot reviewer loop driven
+by `/handoff` — see `docs/dev-guide/copilot-review.md`).
 
 ### MCP servers (`.mcp.json`)
 
