@@ -185,7 +185,15 @@ Migrate to Payload CMS. See [Migrating to Payload CMS](#migrating-to-payload-cms
 
 ```bash
 git clone git@github.com:click2tman/ai-led-sdlc-demo.git
-cd ai-led-sdlc-demo/salone-explorer   # the Vite app lives in this subdirectory
+cd ai-led-sdlc-demo
+```
+
+The Vite app is scaffolded into the `salone-explorer/` subdirectory during
+Phase 1 (see `SPEC.md` §19); until then that directory does not exist. Once
+it has been scaffolded, install from inside it:
+
+```bash
+cd salone-explorer
 npm install
 ```
 
