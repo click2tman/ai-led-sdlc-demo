@@ -1,73 +1,62 @@
-# React + TypeScript + Vite
+# Salone Explorer (app)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The shippable Salone Explorer SPA - a Sierra Leone tour guide published by
+TpGroup (SL) Limited under the FambulTik brand. This is the application tree;
+the AI-led SDLC harness, docs, and spec live one level up at the repository
+root. `SPEC.md` (repo root) is the single source of truth.
 
-Currently, two official plugins are available:
+Vercel builds **only this directory** (Root Directory = `salone-explorer`),
+so the harness and docs never reach the deployment.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+Vite 5 + React 18 + TypeScript (strict), react-router-dom v6 (data router),
+Tailwind 3 over FambulTik/TpGroup design tokens, Radix UI primitives, Supabase
+(Phase 5+). See `SPEC.md` §3.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Architecture: three layers
 
-## Expanding the ESLint configuration
+Code never holds strings or facts (SPEC §5).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Code** - `src/components`, `src/pages`, `src/lib`, `src/seo`.
+- **Data** - `src/data/*.json` (attractions, regions), read through the
+  `attractions` repository in `src/lib/content`.
+- **Content** - `src/content/strings.en.json`, read via `t("namespace.key")`.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+The repository is selected by `VITE_ATTRACTIONS_SOURCE` (`file` default;
+`supabase` after the Phase 2.5 migration).
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Commands
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev            # Vite dev server (http://localhost:5173)
+npm run build          # tsc --noEmit + bundle + sitemap.xml/llms.txt
+npm run build:prerender # build + static pre-render of public routes
+npm run preview        # serve dist/
+npm run lint           # ESLint incl. jsx-a11y (errors fail the build)
+npm run typecheck      # tsc --noEmit
+npm run test           # Vitest unit tests
+npm run test:a11y      # Playwright + axe-core smoke (five routes)
+npm run migrate:attractions # Phase 2.5: JSON -> Supabase
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Node 20+ required.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Environment
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Copy `.env.example` to `.env.local`. Only `VITE_`-prefixed vars reach the
+browser. The Supabase service-role key is used only by the migration script
+and must never be committed or `VITE_`-prefixed. See `SPEC.md` §16.
+
+## Pre-rendering
+
+Static HTML for crawlers and LLM ingestion is produced by
+`scripts/prerender.ts` (Playwright postbuild), not a Vite plugin - see
+`docs/adr/0002-prerender-and-audit-scope.md`. The Vercel build command should
+be `npx playwright install --with-deps chromium && npm run build:prerender`.
+
+## CI
+
+Four workflows gate merges (repo root `.github/workflows`): `ci`, `codeql`,
+`security`, `a11y`. All run with `working-directory: salone-explorer`.
