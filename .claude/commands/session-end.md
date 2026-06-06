@@ -25,6 +25,17 @@ reads from. Clear the active-session pointer.
      `npm run typecheck`, `npm run build`, and the secret scan — these
      exist only after Phase 1 has scaffolded `package.json`.
    - PRs opened (search session updates and `gh pr list`).
+   - Token usage for the session window. Derive the start date from the
+     `started` frontmatter (the `YYYY-MM-DD` part) and run:
+
+     ```
+     python3 "$CLAUDE_PROJECT_DIR/.claude/scripts/token-report.py" \
+       --since <started-date> --summary
+     ```
+
+     This is approximate (filtered by date, not exact session boundary);
+     label it as such. Token counts are exact; cost reads `n/a` unless
+     rates are set in `.claude/config/model-pricing.json`.
 
 3. **Update the frontmatter** of the active session file:
    - `ended:` -> now (`YYYY-MM-DD HH:MM ZZZ`)
@@ -36,6 +47,7 @@ reads from. Clear the active-session pointer.
    ```
    Duration: <h:mm>
    Commits: <count>   PRs opened: <count>   Files changed: <count>
+   Token usage (this session, approx): <token-report --summary output>
 
    Goals reached:
      - [x] goal 1 (cite update timestamp)
