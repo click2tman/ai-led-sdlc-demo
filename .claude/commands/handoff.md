@@ -51,8 +51,14 @@ Claude never runs `gh pr merge` (denied by hook).
     ```
     .claude/scripts/copilot-review.sh request <pr>
     ```
-    This is automatic on every `/handoff`. Note: `gh pr view --json
-    reviewRequests` omits bot reviewers — confirm with
+    Automatic on every `/handoff`. Best-effort: GitHub will not add the
+    Copilot bot through the API unless Copilot code review is enabled for
+    the repo (an admin setting), so the script verifies and exits `3` if
+    it could not add it. On exit `3`, surface its message to the owner
+    (enable repo-level auto-request, or click Request Copilot review on
+    the PR) and **still start the watcher** — the review may arrive via
+    the repo auto-rule or a manual click. Note: `gh pr view --json
+    reviewRequests` omits bot reviewers; confirm with
     `gh api repos/<owner>/<repo>/pulls/<pr>/requested_reviewers`.
 
 11. **Start the background watcher.** Launch it as a backgrounded Bash

@@ -24,7 +24,13 @@
 # See docs/dev-guide/copilot-review.md.
 set -euo pipefail
 
+# Copilot carries two distinct logins: as a requested reviewer it is
+# "Copilot"; as a review/comment author it is the bot actor
+# "copilot-pull-request-reviewer[bot]". The request path matches the
+# reviewer login exactly; the watch/emit paths match the author login by
+# case-insensitive substring so both spellings are caught.
 COPILOT_LOGIN="Copilot"
+COPILOT_MATCH="copilot"
 POLL_INTERVAL="${COPILOT_POLL_INTERVAL:-20}"
 POLL_TIMEOUT="${COPILOT_POLL_TIMEOUT:-1200}"
 
@@ -48,52 +54,53 @@ repo_slug() {
     || die "could not resolve OWNER/REPO via gh repo view"
 }
 
-# request_via_graphql <repo> <pr>
-# Fallback path: some repo configurations reject bot logins through the
-# REST requested_reviewers endpoint. The GraphQL requestReviews mutation
-# accepts the Copilot bot by node id.
-request_via_graphql() {
-  local repo="$1" pr="$2" pr_id bot_id
-  pr_id="$(gh api "repos/$repo/pulls/$pr" --jq .node_id)" \
-    || return 1
-  bot_id="$(gh api "users/$COPILOT_LOGIN" --jq .node_id)" \
-    || return 1
-  gh api graphql -f prId="$pr_id" -f botId="$bot_id" -f query='
-    mutation($prId: ID!, $botId: ID!) {
-      requestReviews(input: {pullRequestId: $prId, userIds: [$botId], union: true}) {
-        pullRequest { id }
-      }
-    }' >/dev/null 2>&1
+# is_copilot_requested <repo> <pr>
+# True when Copilot is currently a requested reviewer on the PR. Used to
+# verify the POST actually took: GitHub returns 201 for the request but
+# silently drops the Copilot bot when Copilot code review is not enabled
+# for the repo/account, so the status code alone cannot be trusted.
+is_copilot_requested() {
+  local repo="$1" pr="$2" n
+  n="$(gh api "repos/$repo/pulls/$pr/requested_reviewers" \
+    --jq "[.users[] | select(.login == \"$COPILOT_LOGIN\")] | length")" \
+    || die "failed to read requested reviewers for $repo#$pr"
+  [ "${n:-0}" -gt 0 ]
 }
 
+# cmd_request - exit codes:
+#   0  Copilot is a requested reviewer (added now, or already was)
+#   3  the API would not add Copilot (feature not enabled / needs admin or
+#      a manual click) - caller should still start the watcher
 cmd_request() {
-  local pr="$1" repo out rc
+  local pr="$1" repo
   [ -n "$pr" ] || die "usage: copilot-review.sh request <pr>"
   repo="$(repo_slug)"
 
-  set +e
-  out="$(gh api --method POST "repos/$repo/pulls/$pr/requested_reviewers" \
-    -f "reviewers[]=$COPILOT_LOGIN" 2>&1)"
-  rc=$?
-  set -e
-
-  if [ "$rc" -eq 0 ]; then
-    echo "requested Copilot review on $repo#$pr"
-    return 0
-  fi
-
-  # Already-requested is expected: the repo may auto-request Copilot.
-  if printf '%s' "$out" | grep -qiE 'already|duplicate'; then
+  if is_copilot_requested "$repo" "$pr"; then
     echo "Copilot already requested on $repo#$pr"
     return 0
   fi
 
-  if request_via_graphql "$repo" "$pr"; then
-    echo "requested Copilot review on $repo#$pr (graphql)"
+  # POST is best-effort: GitHub answers 201 even when it ignores the bot,
+  # so we verify rather than trust the response. Never report a success we
+  # did not actually get (no silent fallback).
+  gh api --method POST "repos/$repo/pulls/$pr/requested_reviewers" \
+    -f "reviewers[]=$COPILOT_LOGIN" >/dev/null 2>&1 || true
+
+  if is_copilot_requested "$repo" "$pr"; then
+    echo "requested Copilot review on $repo#$pr"
     return 0
   fi
 
-  die "failed to request Copilot review on $repo#$pr: $out"
+  >&2 cat <<MSG
+copilot-review: could not add Copilot as a reviewer on $repo#$pr via the API.
+GitHub accepts the request (201) but drops the Copilot bot unless Copilot
+code review is enabled for the repository. Enable it once (repo admin):
+  Settings -> Code review -> Automatically request Copilot code review
+or request it manually from the PR's Reviewers menu. The watcher will pick
+up Copilot's review once it appears.
+MSG
+  return 3
 }
 
 # emit_result <repo> <pr>
@@ -123,7 +130,7 @@ emit_result() {
     }' --jq '{
       threads: [
         .data.repository.pullRequest.reviewThreads.nodes[]
-        | select(.comments.nodes[0].author.login == "'"$COPILOT_LOGIN"'")
+        | select((.comments.nodes[0].author.login // "") | ascii_downcase | contains("'"$COPILOT_MATCH"'"))
         | {
             id: .id,
             isResolved: .isResolved,
@@ -149,7 +156,7 @@ cmd_watch() {
 
   while : ; do
     count="$(gh api "repos/$repo/pulls/$pr/reviews" \
-      --jq "[.[] | select(.user.login == \"$COPILOT_LOGIN\")] | length")" \
+      --jq "[.[] | select((.user.login // \"\") | ascii_downcase | contains(\"$COPILOT_MATCH\"))] | length")" \
       || die "failed to read reviews for $repo#$pr"
     if [ "${count:-0}" -gt 0 ]; then
       emit_result "$repo" "$pr"

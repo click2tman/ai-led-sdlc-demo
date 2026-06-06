@@ -34,7 +34,7 @@ loudly with context (no silent fallbacks).
 
 | Subcommand                 | Does                                                              |
 | -------------------------- | ---------------------------------------------------------------- |
-| `request <pr>`             | Add `Copilot` as a reviewer. REST first; GraphQL `requestReviews` fallback for repo configs that reject bot logins over REST. "Already requested" is treated as success. |
+| `request <pr>`             | Best-effort add of `Copilot` as a reviewer, then verify. GitHub answers 201 but silently drops the bot unless Copilot code review is enabled for the repo, so the script checks `requested_reviewers` and exits `3` (not a false success) when it could not add it. Exit `0` when Copilot is requested (added now or already was). |
 | `watch <pr>`               | Poll `pulls/<pr>/reviews` for a Copilot review, then emit its threads as JSON to stdout and `.claude/sessions/copilot-review-<pr>.json`. |
 | `resolve-thread <node-id>` | GraphQL `resolveReviewThread` — used only after a comment is actually fixed. |
 
@@ -95,8 +95,30 @@ for anything material.
   the `gh` token needs push access on the repo. The script fails loudly
   rather than continuing as if the request succeeded.
 
+## Triggering the review (important)
+
+The API will not add the Copilot bot to `requested_reviewers` unless
+Copilot code review is enabled for the repository. With that disabled,
+the POST returns 201 but the bot is dropped (`request` then exits `3`).
+The GraphQL `requestReviews` mutation cannot substitute — it takes
+`userIds`, and Copilot is a Bot, not a User. So one of the following must
+hold for the trigger to be automatic:
+
+- **Repo-level auto-request** (recommended): an admin enables
+  Settings -> Code review -> Automatically request Copilot code review.
+  Every new PR then gets Copilot without any API call; the watcher and
+  resolve steps run unchanged. (Requires admin; a `repo`-scope token
+  without admin cannot set this.)
+- **Manual click**: a human uses the PR's Reviewers menu to request
+  Copilot. The watcher picks it up from there.
+
+The `request` subcommand stays in the loop as a best-effort attempt plus
+a clear instruction when it cannot add the bot. The durable automation is
+the watch -> classify -> resolve -> ping half, which works however the
+review was triggered.
+
 ## Preconditions
 
-- Copilot code review enabled on the repository
-  (`copilot-pull-request-reviewer` app, login `Copilot`, requestable).
+- Copilot code review enabled for the repository (repo-level auto-request
+  or a manual reviewer request). Without it, `request` exits `3`.
 - `gh` authenticated with `repo` scope (push).
