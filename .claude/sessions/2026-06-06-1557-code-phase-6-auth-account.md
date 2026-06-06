@@ -4,7 +4,7 @@ layer: code
 issue: #11
 context_pack: none
 started: 2026-06-06 15:57 EDT
-ended: in-progress
+ended: 2026-06-06 16:27 EDT
 author: Tamba S Lamin
 actor: claude-autonomous
 branch: issue-11-phase-6-auth-account
@@ -115,7 +115,36 @@ Module layout:
 <Empty. Unresolved questions appended here.>
 
 ## Outcomes
-<Empty. /session-end fills this with the summary.>
+
+Phase 6 (auth + account) code delivered as draft PR #37 -> dev. Built
+AuthProvider/useAuth (SSG-safe), ProtectedRoute, AuthForm wired to
+supabase.auth, SocialSignInButtons, the saved_attractions + tour_bookings
+repositories (user-scoped writes, defense-in-depth user_id filters),
+Bookmark/Favorite (shared SaveButton), ScheduleTourModal (native
+<dialog>), AccountPage, and an auth-aware NavBar. Phase 5 client helper
+isSupabaseConfigured() added. 18 new unit tests (suite 11 -> 29).
+
+code-reviewer + security-reviewer ran pre-handoff; 2 Medium + 3 Low
+security findings and the code-review silent-error/polish findings were
+all fixed in-branch (commit 83c5c1b). Local gates green: secret scan,
+lint, typecheck, 29 tests, build:prerender, a11y 5/5, three-layer greps
+zero. PR #37 CI running at handoff (Vercel preview + npm-audit already
+pass).
+
+Issue housekeeping: closed #6/#7/#8/#9 (phases 1-4, in production via
+#18/#34/#35/#36); advanced #10 (P5 provisioning) and #13 (P2.5) with
+live-infra escalation notes; escalated Phase 7 live steps on #12; linked
+PR on #11.
+
+Commits: d02d081 (prior session records), c29dd9e (Phase 6 feat),
+83c5c1b (review fixes), session record.
 
 ## Next session
-<Empty.>
+1. Human: review + merge PR #37 -> dev.
+2. Phase 5 provisioning (#10): provision Supabase, run schema.sql, enable
+   Email + Google/Facebook/LinkedIn OAuth, set VITE_SUPABASE_* (Vercel +
+   .env.local).
+3. Phase 7 (#12): full-flow smoke, two-account RLS check, deploy, tag.
+4. Then promote dev -> main.
+5. Optional follow-ups: cross-account RLS integration test; DS Toast for
+   schedule.success; tour_bookings notes check constraint (needs an ADR).
