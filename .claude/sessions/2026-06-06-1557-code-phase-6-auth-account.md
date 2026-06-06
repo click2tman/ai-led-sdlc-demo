@@ -4,7 +4,8 @@ layer: code
 issue: #11
 context_pack: none
 started: 2026-06-06 15:57 EDT
-ended: 2026-06-06 16:27 EDT
+ended: 2026-06-06 17:10 EDT
+resumed: 2026-06-06 16:35 EDT
 author: Tamba S Lamin
 actor: claude-autonomous
 branch: issue-11-phase-6-auth-account
@@ -109,7 +110,53 @@ Module layout:
   intact, getUser() (server-validated) used for write user_id rather than the
   client-held session.
 
-## Open questions
+## Live verification (resumed 2026-06-06 16:35 EDT)
+
+- Created salone-explorer/.env.local (gitignored) with Supabase anon creds.
+- Dev server: initial 504s on SPA routes were a stale Vite optimize cache +
+  duplicate vite process; fixed by pkill + rm node_modules/.vite + restart.
+- Sign-up (email/password) via agent-browser returns HTTP 429
+  over_email_send_rate_limit. Root cause: Supabase is still sending a
+  confirmation email on sign-up, i.e. "Confirm email" is still ENABLED
+  despite the precondition answer. App behaved correctly: surfaced the error
+  (mapped to errors.auth.generic) instead of navigating into a sessionless
+  /account. BLOCKED pending the user disabling Confirm email in the Supabase
+  dashboard (and the SMTP hourly rate limit clearing once no emails are sent).
+- Possible follow-up: map 429/over_email_send_rate_limit to a clearer key.
+- After Confirm-email disabled: sign-up returns 200 + session, app navigates
+  to /account, auth-aware NavBar shows Account + Sign out. Profile section
+  renders (email + member-since from the auth user).
+- /account data load errored: PGRST205 "Could not find the table
+  'public.saved_attractions' / 'public.tour_bookings' in the schema cache".
+  The §6.3 tables were not present on project yqsnrxkvywbtwdpmhzju.
+  Resolved by the user running supabase/schema.sql in the SQL editor.
+
+### Live smoke RESULT - all green (against live Supabase, localhost:5173)
+
+Two issues found were both Supabase config, NOT code defects; the app
+surfaced each correctly instead of proceeding into a broken state:
+  1. Confirm-email was still enabled -> sign-up 429 over_email_send_rate_limit.
+  2. schema.sql not applied -> PGRST205 missing tables.
+
+After both fixed, every Phase 6 / SPEC §20 Phase 2 + §20 Phase 6 criterion
+passed end-to-end (agent-browser):
+  - Sign-up (email/pw) returns a session; lands on /account; profile shows
+    email + member-since.
+  - Bookmark insert 201, Favorite insert 201; both persist across reload
+    (isSaved rehydrates aria-pressed=true) and appear on /account joined to
+    the attraction name.
+  - Schedule a tour: insert succeeds, schedule.success shown, row on
+    /account as Date/Party/Status=Pending (status via content key, no enum
+    leak). Cancel: PATCH 204, status -> Cancelled, cancel control removed.
+  - Sign out clears the session, nav reverts to signed-out, and /account
+    redirects to /signin while signed out.
+  - Two-account RLS: user B sees none of user A's bookmarks/favorites/tours
+    (auth.uid() = user_id holds across accounts).
+  - Social: "Continue with Google" redirects through Supabase to
+    accounts.google.com with redirect_to=localhost (OAuth initiates).
+
+No code changes were needed during live verification. Phase 5 provisioning
+(#10) and Phase 7 smoke (#12) are now satisfied on this project.
 
 ## Open questions
 <Empty. Unresolved questions appended here.>
@@ -140,11 +187,14 @@ Commits: d02d081 (prior session records), c29dd9e (Phase 6 feat),
 83c5c1b (review fixes), session record.
 
 ## Next session
+Live local verification is DONE (all Phase 6/7 criteria green incl.
+two-account RLS). Remaining is human + production only:
 1. Human: review + merge PR #37 -> dev.
-2. Phase 5 provisioning (#10): provision Supabase, run schema.sql, enable
-   Email + Google/Facebook/LinkedIn OAuth, set VITE_SUPABASE_* (Vercel +
-   .env.local).
-3. Phase 7 (#12): full-flow smoke, two-account RLS check, deploy, tag.
-4. Then promote dev -> main.
-5. Optional follow-ups: cross-account RLS integration test; DS Toast for
+2. Set VITE_SUPABASE_URL/ANON_KEY in the Vercel production env; redeploy;
+   confirm the deployed build runs the authenticated flow; tag main.
+3. Promote dev -> main.
+4. Optional follow-ups: cross-account RLS *integration* test in CI; map
+   over_email_send_rate_limit/429 to a clearer auth error key; DS Toast for
    schedule.success; tour_bookings notes check constraint (needs an ADR).
+Note: salone-explorer/.env.local holds live anon creds (gitignored); the
+dev server may still be running on localhost:5173.
