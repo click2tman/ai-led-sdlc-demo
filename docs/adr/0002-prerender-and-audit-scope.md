@@ -29,10 +29,7 @@ reports `found 0 vulnerabilities`.
 ## Decision
 
 1. **Remove `vite-plugin-prerender`.** Implement Phase 3 pre-rendering
-   with a postbuild script driven by Playwright, which is already a
-   project dependency for the `a11y.yml` gate. This adds no new
-   dependency and no new audit surface, and still produces static HTML
-   for `/`, `/about`, and every `/attractions/:id` per SPEC §13.1.
+   with a postbuild script. (Superseded 2026-06-06 — see Amendment below.)
 
 2. **Scope the blocking audit to shipped code.** `security.yml` blocks on
    `npm audit --omit=dev --audit-level=high` (the production dependency
@@ -51,3 +48,25 @@ reports `found 0 vulnerabilities`.
   upstream fix lands (tracked: bump Vitest once a fix ships on a Vite-5
   compatible line, or with a future coordinated Vite major bump).
 - This amends SPEC §3 and §15; requires human ratification on PR review.
+
+## Amendment (2026-06-06): SSG instead of Playwright prerender
+
+The Playwright postbuild renders correctly locally but cannot run on the
+Vercel build image (Chromium's system libraries can't be installed there).
+Pre-rendering was reworked as **browser-free build-time SSG**:
+
+- `src/entry-server.tsx` renders each route with `react-dom/server` +
+  React Router's `createStaticHandler`/`createStaticRouter`, capturing the
+  Helmet head and the loader data.
+- `vite build --ssr` bundles it (`ssr.noExternal: ['react-helmet-async']`
+  for CJS interop); `scripts/prerender.ts` writes `dist/<route>/index.html`
+  for `/`, `/about`, `/signin`, `/signup`, and every `/attractions/:id`.
+- The loader data is serialized into `window.__staticRouterHydrationData`
+  and seeded into `createBrowserRouter` so `useLoaderData()` resolves on the
+  first client render.
+- Build command is `npm run build:prerender`; no Chromium needed.
+
+Note: `vite preview` serves the root `index.html` for nested routes (SPA
+fallback) rather than the prerendered file, so the `a11y.yml` gate runs the
+plain SPA `npm run build` (equivalent post-render DOM). Vercel serves the
+nested prerendered files via the `routes` `filesystem` handle (ADR 0003).
