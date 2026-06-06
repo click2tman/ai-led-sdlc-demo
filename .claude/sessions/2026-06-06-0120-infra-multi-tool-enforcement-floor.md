@@ -26,12 +26,12 @@ generates `AGENTS.md` (Codex) and `GEMINI.md` (Gemini) from `CLAUDE.md` +
 SPEC §19); tracked as harness tooling on a chore branch.
 
 ## Goals
-- [ ] `.githooks/commit-msg` enforces the traceability trailer
-- [ ] `.githooks/pre-commit` runs secret scan + new-file header + three-layer grep
-- [ ] `scripts/install-git-hooks.sh` sets `core.hooksPath`
-- [ ] `scripts/gen-agent-memory.sh` generates AGENTS.md and GEMINI.md
-- [ ] Hooks reuse existing `.claude/scripts/` logic (one source of truth)
-- [ ] Document the known gaps (reset --hard / force-push / --no-verify not git-hook-enforceable)
+- [x] `.githooks/commit-msg` enforces the traceability trailer
+- [x] `.githooks/pre-commit` runs secret scan + new-file header + three-layer grep
+- [x] `.claude/scripts/install-git-hooks.sh` sets `core.hooksPath`
+- [x] `.claude/scripts/gen-agent-memory.sh` generates AGENTS.md and GEMINI.md
+- [x] Hooks reuse existing `.claude/scripts/` logic (one source of truth)
+- [x] Document the known gaps (reset --hard / force-push / hook-bypass not git-hook-enforceable)
 
 ## Plan
 Portable enforcement floor only (per user decision). Per-tool slash
@@ -39,6 +39,14 @@ command / subagent / skill parity is explicitly out of scope. CI mirror
 of the hooks deferred to a follow-up.
 
 ## Updates
+- 2026-06-06 01:20 EDT - Built and committed the floor (commit 03fa97b) on
+  branch chore-multi-tool-enforcement-floor. Both git hooks tested:
+  commit-msg blocks a missing trailer / exempts merges; pre-commit blocks
+  a headerless new file, a hard-coded string, and an attraction name.
+  Fixed a bash 3.2 portability bug (mapfile -> while-read; guarded empty
+  array expansion under set -u). The Claude Code pre-tool-bash hook also
+  fired on the first commit attempt because the body contained the literal
+  hook-bypass flag string; reworded.
 
 ## Findings
 - `pre-tool-bash.sh`, `pre-tool-edit.sh`, `scan-secrets.sh` hold the
