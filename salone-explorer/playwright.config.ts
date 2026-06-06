@@ -17,8 +17,11 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: `npm run preview -- --port ${PORT} --strictPort`,
+    // Serve the built dist/ the way Vercel does (real files + directory
+    // index, then SPA fallback) so the gate tests the prerendered artifact.
+    command: 'node scripts/serve-dist.mjs',
     port: PORT,
+    env: { PORT: String(PORT) },
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },
