@@ -241,57 +241,43 @@ VITE_STRIPE_PUBLISHABLE_KEY=
 
 ## Project Structure
 
+The shippable app and the AI-led SDLC tooling live in **separate trees**. The repo root holds the spec, docs, CI config, and the `.claude/` harness; the app is scaffolded into `salone-explorer/`. **Vercel's Root Directory is `salone-explorer`**, so the deployment is built only from that folder and never contains the harness or docs (see [ADR 0001](docs/adr/0001-app-subdirectory-separation.md)).
+
 ```
-ai-led-sdlc-demo/
+ai-led-sdlc-demo/                # repo root — NOT deployed
 ├── .github/
-│   ├── workflows/{ci,codeql,security,a11y}.yml
+│   ├── workflows/{ci,codeql,security,a11y}.yml   # run working-directory: salone-explorer
 │   └── dependabot.yml
-├── public/
-│   ├── robots.txt
-│   ├── sitemap.xml           # generated at build
-│   ├── llms.txt              # GEO content map
-│   └── favicon.svg
-├── scripts/
-│   ├── generate-sitemap.ts
-│   └── migrate-attractions-to-supabase.ts  # Phase 2.5
-├── supabase/schema.sql
-├── tests/a11y/smoke.spec.ts
-├── src/
-│   ├── main.tsx
-│   ├── App.tsx
-│   ├── index.css
-│   ├── assets/brand/fambultik/
-│   ├── styles/tokens.css
-│   │
-│   ├── data/                 # ── DATA LAYER ─────────────────
-│   │   ├── types.ts
-│   │   ├── attractions.json
-│   │   └── regions.json
-│   │
-│   ├── content/              # ── CONTENT LAYER ──────────────
-│   │   ├── strings.en.json
-│   │   └── pages/{home,about}.json
-│   │
-│   ├── lib/                  # ── CODE LAYER ─────────────────
-│   │   ├── supabase.ts
-│   │   ├── content/
-│   │   │   ├── attractions.ts          # interface
-│   │   │   ├── attractions.file.ts     # JSON impl
-│   │   │   ├── attractions.supabase.ts # DB impl (P2.5)
-│   │   │   ├── strings.ts              # t() helper
-│   │   │   └── index.ts                # barrel; picks impl
-│   │   ├── bookmarks.ts
-│   │   └── bookings.ts
-│   ├── seo/                  # SeoHead, JsonLd, graph builders
-│   ├── auth/                 # AuthProvider, ProtectedRoute
-│   ├── components/           # DS-aligned UI
-│   └── pages/                # route components
-├── index.html
-├── vercel.json
-├── vite.config.ts
-├── tailwind.config.js
-├── tsconfig.json
-└── package.json
+├── .claude/                     # AI-led SDLC harness
+├── docs/                        # documentation + adr/
+├── SPEC.md  README.md
+└── salone-explorer/             # ── THE APP — Vercel Root Directory ──
+    ├── index.html  vercel.json  vite.config.ts
+    ├── tailwind.config.js  tsconfig.json  package.json
+    ├── public/{robots.txt, sitemap.xml, llms.txt, favicon.svg}
+    ├── scripts/{generate-sitemap.ts, migrate-attractions-to-supabase.ts}
+    ├── supabase/schema.sql
+    ├── tests/a11y/smoke.spec.ts
+    └── src/
+        ├── main.tsx  App.tsx  index.css
+        ├── assets/brand/fambultik/   styles/tokens.css
+        ├── data/                 # ── DATA LAYER ─────────────────
+        │   ├── types.ts  attractions.json  regions.json
+        ├── content/              # ── CONTENT LAYER ──────────────
+        │   ├── strings.en.json  pages/{home,about}.json
+        ├── lib/                  # ── CODE LAYER ─────────────────
+        │   ├── supabase.ts
+        │   ├── content/
+        │   │   ├── attractions.ts          # interface
+        │   │   ├── attractions.file.ts     # JSON impl
+        │   │   ├── attractions.supabase.ts # DB impl (P2.5)
+        │   │   ├── strings.ts              # t() helper
+        │   │   └── index.ts                # barrel; picks impl
+        │   ├── bookmarks.ts  bookings.ts
+        ├── seo/                  # SeoHead, JsonLd, graph builders
+        ├── auth/                 # AuthProvider, ProtectedRoute
+        ├── components/           # DS-aligned UI
+        └── pages/                # route components
 ```
 
 ---
@@ -452,7 +438,7 @@ See `SPEC.md` §5.4 for the architectural sketch.
 
 ### Vercel
 Project: [`tp-isent/ai-led-sdlc-demo`](https://vercel.com/tp-isent/ai-led-sdlc-demo). Use the existing project — do not create a new one.
-1. Connect the repo to the existing project. Framework Preset: **Vite**. Build Command: `npm run build`. Output Directory: `dist`.
+1. Connect the repo to the existing project. **Root Directory: `salone-explorer`** (excludes `.claude/` and `docs/` from the build). Framework Preset: **Vite**. Build Command: `npm run build`. Output Directory: `dist`.
 2. Set env vars: `VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com`, `VITE_ATTRACTIONS_SOURCE=file`, and (Phase 2) `VITE_SUPABASE_*`.
 3. Map the `slint-ai-led-sdlc.tpgroupsl.com` domain. Deploy. Auto-deploys on every push to `main`.
 

@@ -14,6 +14,34 @@ The project target is **Salone Explorer**, a Sierra Leone tour-guide SPA publish
 
 When scaffolding, follow `SPEC.md` §19 (Delivery Workflow) phase by phase, and commit at the end of each phase.
 
+## Repository layout: app vs harness (binding)
+
+The shippable application and the AI-led SDLC harness live in **separate
+trees** so the production artefact never contains the tooling:
+
+```
+ai-led-sdlc-demo/          <- repo root: harness + docs + spec only
+├── .claude/               <- AI harness (NOT deployed)
+├── docs/                  <- documentation (NOT deployed)
+├── SPEC.md  README.md     <- spec + front door
+└── salone-explorer/       <- the Vite app — the ONLY thing Vercel builds
+    ├── package.json  vite.config.ts  tsconfig.json
+    └── src/{components,pages,lib,data,content,...}
+```
+
+- The app is scaffolded into `salone-explorer/` (a repo subdirectory),
+  not the repo root. `npm create vite@latest salone-explorer` (SPEC §19
+  Phase 1) already produces this folder.
+- **Vercel Root Directory = `salone-explorer`.** Vercel clones the repo
+  but builds only from there, so `.claude/`, `docs/`, and other
+  repo-root files are excluded from the deployment by construction.
+- **Run app commands from inside the app dir:** `cd salone-explorer`
+  before `npm run ...`. CI workflows set `working-directory: salone-explorer`.
+- **Path convention:** `src/...` paths in this file and the rules are
+  relative to `salone-explorer/`. Harness checks that run from the repo
+  root (e.g. the three-layer grep in `verification-loop`) `cd salone-explorer`
+  first, or target `salone-explorer/src/...`.
+
 ## AI harness (`.claude/`)
 
 This repo ships an AI-led SDLC harness: subagents, governance hooks,
@@ -78,7 +106,7 @@ When adding any new domain type, define the interface first, add the file-based 
 
 ## Commands (post-scaffold)
 
-These commands are defined in `SPEC.md` §18 and will be wired in `package.json` once Phase 1 scaffolding is complete. They do not work until then.
+These commands are defined in `SPEC.md` §18 and will be wired in `package.json` once Phase 1 scaffolding is complete. They do not work until then. Run them from the app directory: `cd salone-explorer` first.
 
 | Command                       | Purpose                                                              |
 | ----------------------------- | -------------------------------------------------------------------- |
@@ -90,13 +118,13 @@ These commands are defined in `SPEC.md` §18 and will be wired in `package.json`
 | `npm run test:a11y`           | Playwright + `@axe-core/playwright` smoke across five routes.        |
 | `npm run migrate:attractions` | Phase 2.5: upsert `src/data/attractions.json` into Supabase.         |
 
-Run a single Playwright spec with `npx playwright test tests/a11y/smoke.spec.ts -g "name of test"`.
+Run a single Playwright spec with `npx playwright test tests/a11y/smoke.spec.ts -g "name of test"` (from `salone-explorer/`).
 
 Node 20+ required.
 
 ## Branching and CI
 
-Merges to `main` require four workflows green: `ci.yml`, `codeql.yml`, `security.yml`, `a11y.yml`. The a11y workflow fails on serious or critical axe violations on `/`, `/attractions/tiwai-island`, `/about`, `/signin`, `/signup`.
+Merges to `main` require four workflows green: `ci.yml`, `codeql.yml`, `security.yml`, `a11y.yml`. The a11y workflow fails on serious or critical axe violations on `/`, `/attractions/tiwai-island`, `/about`, `/signin`, `/signup`. All four run with `working-directory: salone-explorer` (the app subdirectory).
 
 ## Phase 2 (Supabase) preconditions
 

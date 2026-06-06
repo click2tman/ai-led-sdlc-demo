@@ -34,8 +34,12 @@ N/A (no package.json yet) rather than failing them.
 Run in this order. Stop at the first failing step; do not run the rest.
 
 ```
-# 1. Secret scan - ALWAYS, even pre-scaffold
+# 0. Secret scan runs from the repo root (covers harness + app).
 .claude/scripts/scan-secrets.sh --staged        # or explicit <paths...>
+
+# All app steps (lint..a11y) and the three-layer greps run from the app
+# subdirectory. The app lives in salone-explorer/ (SPEC §12); cd in once.
+cd salone-explorer
 
 # 2. Lint (eslint incl. jsx-a11y)         [needs package.json]
 npm run lint
@@ -61,7 +65,12 @@ Start it first, or skip with an explicit note if no server is available.
 
 ## Three-layer grep checks (always run; both must return zero matches)
 
-These enforce `.claude/rules/three-layer-separation.md`.
+These enforce `.claude/rules/three-layer-separation.md`. Run them from the
+app subdirectory (`cd salone-explorer` per the sequence above) so the
+`src/...` targets resolve; from the repo root, prefix paths with
+`salone-explorer/`. A grep that finds nothing because it pointed at the
+wrong directory is a silent pass — never accept a zero-match result
+without confirming the path exists.
 
 ```
 # (a) No hard-coded English UI strings or known attraction names in the
