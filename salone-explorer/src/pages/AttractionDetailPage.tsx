@@ -20,6 +20,9 @@ import { DirectionsButton } from '@/components/DirectionsButton';
 import { FaqAccordion } from '@/components/FaqAccordion';
 import { SourcesList } from '@/components/SourcesList';
 import { buttonVariants } from '@/components/Button';
+import { BookmarkButton } from '@/components/BookmarkButton';
+import { FavoriteButton } from '@/components/FavoriteButton';
+import { ScheduleTourModal } from '@/components/ScheduleTourModal';
 
 export async function attractionLoader({
   params,
@@ -170,6 +173,16 @@ export function AttractionDetailPage() {
           </div>
 
           <aside className="flex flex-col gap-4">
+            <section
+              aria-label={t('attraction.actions.label')}
+              className="flex flex-col gap-3"
+            >
+              <ScheduleTourModal attractionId={attraction.id} />
+              <div className="flex flex-wrap gap-3">
+                <BookmarkButton attractionId={attraction.id} />
+                <FavoriteButton attractionId={attraction.id} />
+              </div>
+            </section>
             <HoursBlock hours={attraction.hours} />
             <DirectionsButton
               location={attraction.location}

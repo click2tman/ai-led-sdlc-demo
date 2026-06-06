@@ -1,19 +1,22 @@
 // Site header (SPEC §9.1, DS Header pattern). FambulTik logo linking home
 // plus primary navigation. The mobile menu is a disclosure with a labelled
 // toggle (aria-expanded / aria-controls) for keyboard and screen-reader use.
-// Identical on every route (WCAG 3.2.3 consistent navigation).
+// Identical on every route (WCAG 3.2.3 consistent navigation). Phase 6: the
+// trailing item is auth-aware - Account + Sign out when signed in, Sign in
+// otherwise. Until the session resolves it shows the signed-out item, which
+// matches the prerendered (signed-out) HTML so hydration stays stable.
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { FambulTikLogo } from './FambulTikLogo';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { t, type StringKey } from '@/lib/content';
 
 type NavItem = { to: string; label: StringKey };
 
-const NAV_ITEMS: NavItem[] = [
+const BASE_ITEMS: NavItem[] = [
   { to: '/', label: 'nav.home' },
   { to: '/about', label: 'nav.about' },
-  { to: '/signin', label: 'nav.signin' },
 ];
 
 function navLinkClass({ isActive }: { isActive: boolean }): string {
@@ -24,6 +27,50 @@ function navLinkClass({ isActive }: { isActive: boolean }): string {
 
 export function NavBar() {
   const [open, setOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const navItems: NavItem[] = user
+    ? [...BASE_ITEMS, { to: '/account', label: 'nav.account' }]
+    : [...BASE_ITEMS, { to: '/signin', label: 'nav.signin' }];
+
+  async function handleSignOut() {
+    setOpen(false);
+    await signOut();
+    navigate('/');
+  }
+
+  /** Primary links plus the auth control, shared by desktop and mobile. */
+  function renderItems() {
+    return (
+      <>
+        {navItems.map((item) => (
+          <li key={item.to}>
+            <NavLink
+              to={item.to}
+              className={navLinkClass}
+              end={item.to === '/'}
+              onClick={() => setOpen(false)}
+            >
+              {t(item.label)}
+            </NavLink>
+          </li>
+        ))}
+        {user && (
+          <li>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="inline-flex min-h-[44px] items-center px-3 text-base font-medium text-text hover:text-brand-primary"
+            >
+              {t('nav.signout')}
+            </button>
+          </li>
+        )}
+      </>
+    );
+  }
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2">
@@ -32,15 +79,7 @@ export function NavBar() {
         </Link>
 
         <nav aria-label={t('nav.primaryLabel')} className="hidden md:block">
-          <ul className="flex items-center gap-1">
-            {NAV_ITEMS.map((item) => (
-              <li key={item.to}>
-                <NavLink to={item.to} className={navLinkClass} end={item.to === '/'}>
-                  {t(item.label)}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+          <ul className="flex items-center gap-1">{renderItems()}</ul>
         </nav>
 
         <button
@@ -66,18 +105,7 @@ export function NavBar() {
           className="border-t border-border md:hidden"
         >
           <ul className="mx-auto flex max-w-6xl flex-col px-4 py-2">
-            {NAV_ITEMS.map((item) => (
-              <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  className={navLinkClass}
-                  end={item.to === '/'}
-                  onClick={() => setOpen(false)}
-                >
-                  {t(item.label)}
-                </NavLink>
-              </li>
-            ))}
+            {renderItems()}
           </ul>
         </nav>
       )}

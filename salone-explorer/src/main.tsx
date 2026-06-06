@@ -3,13 +3,14 @@
 // management. Route config is shared with the SSG renderer (src/routes.tsx).
 // When the page was pre-rendered, the loader data is seeded from
 // window.__staticRouterHydrationData so useLoaderData() resolves on first
-// render. AuthProvider is added in Phase 6.
+// render. AuthProvider (Phase 6) owns the Supabase session for the tree.
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import { routes } from './routes';
+import { AuthProvider } from './lib/auth/AuthProvider';
 import type { HydrationData } from './entry-server';
 
 declare global {
@@ -30,7 +31,9 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <StrictMode>
     <HelmetProvider>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </HelmetProvider>
   </StrictMode>,
 );

@@ -12,6 +12,7 @@ import {
 } from 'react-router-dom/server';
 import { HelmetProvider, type HelmetServerState } from 'react-helmet-async';
 import { routes } from './routes';
+import { AuthProvider } from './lib/auth/AuthProvider';
 
 /** Serializable loader state seeded into the client router on hydration. */
 export type HydrationData = {
@@ -44,7 +45,9 @@ export async function render(url: string): Promise<RenderResult> {
   const appHtml = renderToString(
     <StrictMode>
       <HelmetProvider context={helmetContext}>
-        <StaticRouterProvider router={router} context={context} />
+        <AuthProvider>
+          <StaticRouterProvider router={router} context={context} />
+        </AuthProvider>
       </HelmetProvider>
     </StrictMode>,
   );
