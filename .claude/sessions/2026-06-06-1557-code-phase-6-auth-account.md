@@ -158,6 +158,14 @@ passed end-to-end (agent-browser):
 No code changes were needed during live verification. Phase 5 provisioning
 (#10) and Phase 7 smoke (#12) are now satisfied on this project.
 
+- 2026-06-06 17:20 EDT - Follow-up commit 56351d2: mapAuthError now maps
+  429/over_email_send_rate_limit/*_rate_limit to a new errors.auth.rateLimit
+  key (was the misleading generic "could not sign you in"); reads the
+  Supabase error code+status, not just the message. Also made the
+  attractions-supabase "not configured" test hermetic (stub env empty) so it
+  passes even with a populated .env.local. lint/typecheck/31 tests/build
+  green. Pushed to PR #37.
+
 ## Open questions
 <Empty. Unresolved questions appended here.>
 
