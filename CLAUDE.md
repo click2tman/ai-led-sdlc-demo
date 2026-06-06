@@ -14,6 +14,27 @@ The project target is **Salone Explorer**, a Sierra Leone tour-guide SPA publish
 
 When scaffolding, follow `SPEC.md` §19 (Delivery Workflow) phase by phase, and commit at the end of each phase.
 
+## AI harness (`.claude/`)
+
+This repo ships an AI-led SDLC harness: subagents, governance hooks,
+rules, skills, and slash commands. Full reference: `docs/dev-guide/claude-harness.md`.
+
+- **Rules** in `.claude/rules/` are loaded every session and are binding:
+  `three-layer-separation` (keystone), `engineering-principles`,
+  `spec-first`, `commit-conventions`, `branch-conventions`,
+  `test-conventions`, `api-conventions`, `80-20-split`.
+- **Sessions are mandatory** for development work: `/session-start` →
+  `/session-update` → `/session-end`. The session file is the durable
+  memory between sessions.
+- **Governance is enforced by hooks**: code-producing prompts must
+  reference a SPEC phase/section or a GitHub issue; commits need a
+  `Requirement:`/`Phase:`/`Incident:` trailer; new source files need a
+  one-line header; secrets, force-push, `reset --hard`, `--no-verify`,
+  and `gh pr merge` are hard-blocked.
+- **Activation** (one-time, human-only): move `.claude/settings.json.proposed`
+  to `.claude/settings.json` and copy `settings.local.json.template` to
+  `settings.local.json`, then restart Claude Code.
+
 ## Non-negotiable architectural rules
 
 These are the rules most likely to be violated by an AI agent and cause the most damage. They come from `SPEC.md` §5 and §22.
