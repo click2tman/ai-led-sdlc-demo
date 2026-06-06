@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" role="img" aria-label="FambulTik">
-  <g fill="none" stroke="#FEF3C7" stroke-width="3" stroke-linecap="round">
-    <path d="M14 38V12h14M14 25h11" />
-    <path d="M34 38l-6 0" />
-  </g>
-  <circle cx="20" cy="24" r="3" fill="#FEF3C7" />
-  <text x="44" y="32" font-family="Lora, Georgia, serif" font-size="24" font-weight="600" fill="#FFFFFF">Fambul<tspan fill="#FEF3C7">Tik</tspan></text>
-</svg>

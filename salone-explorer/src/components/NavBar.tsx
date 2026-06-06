@@ -28,7 +28,7 @@ export function NavBar() {
     <header className="sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2">
         <Link to="/" className="inline-flex items-center py-1" aria-label={t('nav.home')}>
-          <FambulTikLogo variant="dark" height={32} />
+          <FambulTikLogo height={44} />
         </Link>
 
         <nav aria-label={t('nav.primaryLabel')} className="hidden md:block">
