@@ -74,7 +74,23 @@ disclaimer + scoped guardrail.
   real bookings are processed"). Owner chose to keep the disclaimer
   intact for the demo; flag that the payments phase must revise it.
 
+### 2026-06-05 23:46 EDT - committed + issues drafted
+- SPEC commit 54d20b2 pushed to origin/dev.
+- Drafted 5 issues on click2tman/ai-led-sdlc-demo:
+  - #1 Phase 6: Social login (Google, Facebook, LinkedIn)
+  - #2 Phase 3: AEO
+  - #3 Phase 9: Real-time reviews
+  - #4 Phase 10: Email notifications
+  - #5 Phase 11: Payments (Stripe)
+
 ## Open questions
+- Issues NOT yet added to users/click2tman/projects/3: gh token lacks the
+  project scope. User must run `gh auth refresh -s project` (interactive),
+  then add items (see Next session).
+- Branch policy: SPEC change committed directly to dev (pre-scaffold, no
+  CI to gate a PR; matches the harness-commit precedent). Once the app is
+  scaffolded, route SPEC/feature changes through a branch + PR per
+  branch-conventions.
 
 ## Outcomes
 
