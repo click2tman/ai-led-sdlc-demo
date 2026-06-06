@@ -32,11 +32,17 @@ The only places literals are allowed: tests, `src/data/`, and
 
 ## Verification
 
+The app lives in the `salone-explorer/` subdirectory (SPEC §12), kept
+separate from the `.claude/` harness so the Vercel build excludes the
+tooling. All `src/...` paths in this rule are relative to that app dir.
+
 A grep for hard-coded English strings or known attraction names anywhere
 under `src/components/`, `src/pages/`, or `src/lib/` (excluding
-`src/lib/content/`) must return zero matches. The `code-reviewer` and
-`security-reviewer` agents run this check; `verification-loop` runs it
-before `/handoff`.
+`src/lib/content/`) must return zero matches. Run it from
+`salone-explorer/` (or target `salone-explorer/src/...` from the repo
+root) — a grep pointed at a non-existent path returns zero and would
+mask a real leak. The `code-reviewer` and `security-reviewer` agents run
+this check; `verification-loop` runs it before `/handoff`.
 
 ## Repository pattern for all data access
 

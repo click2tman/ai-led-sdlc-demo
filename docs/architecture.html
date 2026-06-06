@@ -418,17 +418,27 @@ export const attractions =
     i18n on-ramp.</p>
 
     <h3>Project structure</h3>
-    <p>The directory tree encodes the layer boundaries. Data and content sit in their own trees; the
-    code layer subdivides into <code>lib/content</code> (repositories), <code>seo</code>,
-    <code>auth</code>, <code>components</code>, and <code>pages</code> (&sect;12).</p>
-    <pre><code>src/
-  data/        DATA LAYER     types.ts, attractions.json, regions.json
-  content/     CONTENT LAYER  strings.en.json, pages/
-  lib/         CODE LAYER     content/ (repos + t()), supabase.ts, bookmarks.ts
-  seo/                        SeoHead.tsx, JsonLd.tsx, graph.ts
-  auth/                       AuthProvider.tsx, ProtectedRoute.tsx
-  components/                 NavBar, Footer, AttractionCard, ...
-  pages/                      HomePage, AttractionDetailPage, AccountPage, ...</code></pre>
+    <p>The shippable app and the AI-led SDLC tooling live in <strong>separate trees</strong>. The
+    repository root holds the spec, docs, CI config, and the <code>.claude/</code> harness; the
+    application is scaffolded into a <code>salone-explorer/</code> subdirectory. Vercel's Root Directory
+    is set to <code>salone-explorer</code>, so the deployment is built only from that folder and never
+    contains the harness or docs (see ADR-09). Within the app, the directory tree encodes the layer
+    boundaries (&sect;12).</p>
+    <pre><code>ai-led-sdlc-demo/          # repo root - NOT deployed
+  .github/workflows/        # CI; jobs run working-directory: salone-explorer
+  .claude/                  # AI-led SDLC harness
+  docs/                     # documentation + adr/
+  SPEC.md  README.md
+  salone-explorer/          # THE APP - Vercel Root Directory
+    package.json  vite.config.ts  tsconfig.json
+    src/
+      data/      DATA LAYER     types.ts, attractions.json, regions.json
+      content/   CONTENT LAYER  strings.en.json, pages/
+      lib/       CODE LAYER     content/ (repos + t()), supabase.ts
+      seo/                      SeoHead.tsx, JsonLd.tsx, graph.ts
+      auth/                     AuthProvider.tsx, ProtectedRoute.tsx
+      components/               NavBar, Footer, AttractionCard, ...
+      pages/                    HomePage, AttractionDetailPage, ...</code></pre>
 
     <h3>Branching and commits</h3>
     <p>Two long-lived branches: <code>dev</code> (integration trunk) and <code>main</code> (production,
@@ -570,9 +580,18 @@ flowchart LR
   GATE -->|yes| PR["promote-dev-to-main PR"]
   PR --> HUMAN["1 human approval"]
   HUMAN --> MAIN["merge to main"]
-  MAIN --> VERCEL["Vercel auto-deploy<br/>(Vite preset)"]
+  MAIN --> VERCEL["Vercel auto-deploy<br/>Root Directory: salone-explorer"]
   VERCEL --> TAG["tag vN.N.N"]
       </pre>
+    </div>
+
+    <div class="callout key">
+      <span class="tag">Deploy boundary</span>
+      <p>The app lives in the <code>salone-explorer/</code> subdirectory and Vercel's <strong>Root
+      Directory</strong> is set to it. Vercel clones the whole repo but builds only from that folder, so
+      the <code>.claude/</code> harness, <code>docs/</code>, and the spec are excluded from the
+      deployment by construction. CI workflows live at the repo root and run with
+      <code>working-directory: salone-explorer</code>. See ADR-09.</p>
     </div>
 
     <h3>The four gates</h3>
@@ -897,6 +916,14 @@ flowchart TB
       <div class="row"><b>Decision:</b> Editorial content stays file-based until a future Phase 8 introduces a <code>payloadAttractionRepository</code>; Supabase keeps user-generated data, Payload owns editorial.</div>
       <div class="row"><b>Why:</b> The repository pattern built on day one is the recognised bridge; no rewrite needed when the team is ready.</div>
       <div class="row"><b>Source:</b> <a href="../SPEC.md">SPEC</a> &sect;5.4, &sect;21</div>
+    </div>
+
+    <div class="adr">
+      <div class="id">ADR-09</div>
+      <h4>App isolated in a subdirectory, separate from the harness</h4>
+      <div class="row"><b>Decision:</b> The Vite app is scaffolded into <code>salone-explorer/</code>; the <code>.claude/</code> harness and <code>docs/</code> stay at the repo root. Vercel's Root Directory is set to <code>salone-explorer</code>; CI runs with <code>working-directory: salone-explorer</code>.</div>
+      <div class="row"><b>Why:</b> The production deployment never contains the AI tooling or docs - the boundary is explicit and enforced by construction, not by an ignore list. The app stays self-contained and portable.</div>
+      <div class="row"><b>Source:</b> <a href="../SPEC.md">SPEC</a> &sect;12, &sect;18, &sect;19 &middot; <a href="adr/0001-app-subdirectory-separation.md">ADR 0001</a></div>
     </div>
   </section>
 

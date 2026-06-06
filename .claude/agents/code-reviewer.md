@@ -87,8 +87,9 @@ Rules referenced below live in `.claude/rules/`.
     multiple t() keys
 ```
 
-   To find leaks fast:
-   `git diff origin/<base>...HEAD -- 'src/components' 'src/pages' 'src/lib'`
+   The app lives in `salone-explorer/` (SPEC §12); `src/...` paths above
+   are relative to it. To find leaks fast (from the repo root):
+   `git diff origin/<base>...HEAD -- 'salone-explorer/src/components' 'salone-explorer/src/pages' 'salone-explorer/src/lib'`
    then grep the added lines for quoted English and known attraction
    names. A confirmed leak is always a FIX.
 

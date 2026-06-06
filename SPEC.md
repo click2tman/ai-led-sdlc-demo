@@ -737,93 +737,108 @@ Salone Explorer **must** conform to WCAG 2.2 Level AA. The TpGroup Design System
 
 ## 12. Project Structure
 
+The shippable app and the AI-led SDLC tooling live in **separate trees**.
+The repository root holds the spec, docs, CI config, and the `.claude/`
+harness; the application is scaffolded into a `salone-explorer/`
+subdirectory. **Vercel's Root Directory is set to `salone-explorer`**, so
+the deployment is built only from that folder and never contains the
+harness or docs. GitHub Actions workflows live at the repository root
+(`.github/` cannot live in a subfolder) and run with
+`working-directory: salone-explorer`.
+
 ```
-salone-explorer/
+ai-led-sdlc-demo/                  # repository root (NOT deployed)
 ├── .github/
-│   ├── workflows/
+│   ├── workflows/                 # CI; jobs set working-directory: salone-explorer
 │   │   ├── ci.yml
 │   │   ├── codeql.yml
 │   │   ├── security.yml
 │   │   └── a11y.yml
 │   └── dependabot.yml
-├── index.html
-├── vite.config.ts
-├── tailwind.config.js
-├── postcss.config.js
-├── tsconfig.json
-├── package.json
-├── .env.example
-├── public/
-│   ├── robots.txt
-│   ├── sitemap.xml
-│   ├── llms.txt
-│   └── favicon.svg
-├── scripts/
-│   ├── generate-sitemap.ts
-│   └── migrate-attractions-to-supabase.ts  # Phase 2.5 (optional)
-├── supabase/
-│   └── schema.sql
-├── tests/
-│   └── a11y/
-│       └── smoke.spec.ts
-└── src/
-    ├── main.tsx                    # router + HelmetProvider + AuthProvider
-    ├── App.tsx
-    ├── index.css                   # imports tokens.css + tailwind
-    ├── assets/
-    │   └── brand/fambultik/
-    │       ├── logo-light.svg
-    │       ├── logo-dark.svg
-    │       └── favicon.svg
-    ├── styles/
-    │   └── tokens.css              # CSS variables (§8.4)
-    ├── data/                       # ── DATA LAYER ────────────────
-    │   ├── types.ts                # Attraction type
-    │   ├── attractions.json        # 8 records, sourced from §4
-    │   └── regions.json            # district → province lookup
-    ├── content/                    # ── CONTENT LAYER ─────────────
-    │   ├── strings.en.json         # flat key→string map
-    │   └── pages/                  # longer-form copy (optional)
-    │       ├── home.json
-    │       └── about.json
-    ├── lib/                        # ── CODE LAYER ────────────────
-    │   ├── supabase.ts
-    │   ├── content/
-    │   │   ├── attractions.ts          # AttractionRepository interface
-    │   │   ├── attractions.file.ts     # JSON implementation
-    │   │   ├── attractions.supabase.ts # Supabase implementation (P2.5)
-    │   │   ├── strings.ts              # t() helper
-    │   │   └── index.ts                # barrel; picks active impl
-    │   ├── bookmarks.ts
-    │   └── bookings.ts
-    ├── seo/
-    │   ├── SeoHead.tsx
-    │   ├── JsonLd.tsx
-    │   └── graph.ts
-    ├── auth/
-    │   ├── AuthProvider.tsx
-    │   └── ProtectedRoute.tsx
-    ├── components/
-    │   ├── NavBar.tsx
-    │   ├── Footer.tsx
-    │   ├── FambulTikLogo.tsx
-    │   ├── AttractionCard.tsx
-    │   ├── RatingBadge.tsx
-    │   ├── HoursBlock.tsx
-    │   ├── DirectionsButton.tsx
-    │   ├── SourcesList.tsx
-    │   ├── FaqAccordion.tsx
-    │   ├── BookmarkButton.tsx
-    │   ├── FavoriteButton.tsx
-    │   └── ScheduleTourModal.tsx
-    └── pages/
-        ├── HomePage.tsx
-        ├── AttractionDetailPage.tsx
-        ├── AboutPage.tsx
-        ├── SignInPage.tsx
-        ├── SignUpPage.tsx
-        ├── AccountPage.tsx
-        └── NotFoundPage.tsx
+├── .claude/                       # AI-led SDLC harness (rules, agents, skills, hooks)
+├── docs/                          # documentation (architecture.html, onboarding.html, adr/)
+├── SPEC.md
+├── README.md
+├── STUDENT_GUIDE.md
+└── salone-explorer/               # ── THE APP — Vercel Root Directory ──
+    ├── index.html
+    ├── vite.config.ts
+    ├── tailwind.config.js
+    ├── postcss.config.js
+    ├── tsconfig.json
+    ├── package.json
+    ├── .env.example
+    ├── public/
+    │   ├── robots.txt
+    │   ├── sitemap.xml
+    │   ├── llms.txt
+    │   └── favicon.svg
+    ├── scripts/
+    │   ├── generate-sitemap.ts
+    │   └── migrate-attractions-to-supabase.ts  # Phase 2.5 (optional)
+    ├── supabase/
+    │   └── schema.sql
+    ├── tests/
+    │   └── a11y/
+    │       └── smoke.spec.ts
+    └── src/
+        ├── main.tsx                # router + HelmetProvider + AuthProvider
+        ├── App.tsx
+        ├── index.css               # imports tokens.css + tailwind
+        ├── assets/
+        │   └── brand/fambultik/
+        │       ├── logo-light.svg
+        │       ├── logo-dark.svg
+        │       └── favicon.svg
+        ├── styles/
+        │   └── tokens.css          # CSS variables (§8.4)
+        ├── data/                   # ── DATA LAYER ────────────────
+        │   ├── types.ts            # Attraction type
+        │   ├── attractions.json    # 8 records, sourced from §4
+        │   └── regions.json        # district → province lookup
+        ├── content/                # ── CONTENT LAYER ─────────────
+        │   ├── strings.en.json     # flat key→string map
+        │   └── pages/              # longer-form copy (optional)
+        │       ├── home.json
+        │       └── about.json
+        ├── lib/                    # ── CODE LAYER ────────────────
+        │   ├── supabase.ts
+        │   ├── content/
+        │   │   ├── attractions.ts          # AttractionRepository interface
+        │   │   ├── attractions.file.ts     # JSON implementation
+        │   │   ├── attractions.supabase.ts # Supabase implementation (P2.5)
+        │   │   ├── strings.ts              # t() helper
+        │   │   └── index.ts                # barrel; picks active impl
+        │   ├── bookmarks.ts
+        │   └── bookings.ts
+        ├── seo/
+        │   ├── SeoHead.tsx
+        │   ├── JsonLd.tsx
+        │   └── graph.ts
+        ├── auth/
+        │   ├── AuthProvider.tsx
+        │   └── ProtectedRoute.tsx
+        ├── components/
+        │   ├── NavBar.tsx
+        │   ├── Footer.tsx
+        │   ├── FambulTikLogo.tsx
+        │   ├── AttractionCard.tsx
+        │   ├── RatingBadge.tsx
+        │   ├── HoursBlock.tsx
+        │   ├── DirectionsButton.tsx
+        │   ├── SourcesList.tsx
+        │   ├── FaqAccordion.tsx
+        │   ├── BookmarkButton.tsx
+        │   ├── FavoriteButton.tsx
+        │   └── ScheduleTourModal.tsx
+        └── pages/
+            ├── HomePage.tsx
+            ├── AttractionDetailPage.tsx
+            ├── AboutPage.tsx
+            ├── SignInPage.tsx
+            ├── SignUpPage.tsx
+            ├── AccountPage.tsx
+            └── NotFoundPage.tsx
 ```
 
 ---
@@ -963,7 +978,10 @@ policy.
 
 ## 18. Build & Run
 
+All app commands run from the `salone-explorer/` subdirectory (§12).
+
 ```bash
+cd salone-explorer
 npm install
 npm run dev
 npm run build
@@ -981,7 +999,7 @@ Node 20+ required.
 ## 19. Delivery Workflow
 
 ### Phase 1 — Scaffold (≈ 8 min)
-1. `npm create vite@latest salone-explorer -- --template react-ts`
+1. From the repo root, `npm create vite@latest salone-explorer -- --template react-ts`. This creates the `salone-explorer/` app subdirectory (§12), kept separate from the `.claude/` harness and `docs/`. Run steps 2–5 inside it (`cd salone-explorer`).
 2. `npm install` and runtime deps: `react-router-dom react-helmet-async @radix-ui/react-dialog @radix-ui/react-accordion @radix-ui/react-toast lucide-react class-variance-authority`
 3. Dev deps: `tailwindcss postcss autoprefixer eslint eslint-plugin-jsx-a11y vite-plugin-prerender @axe-core/playwright @playwright/test wait-on`
 4. `npx tailwindcss init -p`; wire FambulTik tokens.
@@ -1004,10 +1022,10 @@ Node 20+ required.
 17. Verify keyboard navigation + 320 / 375 / 768 / 1024 / 1440 px.
 
 ### Phase 4 — CI + Deploy v1 (≈ 7 min)
-18. Add `.github/workflows/*` and `dependabot.yml`.
-19. Add `tests/a11y/smoke.spec.ts`.
+18. Add `.github/workflows/*` and `dependabot.yml` **at the repository root** (`.github/` cannot live in a subfolder). Each job sets `defaults.run.working-directory: salone-explorer` so lint/typecheck/build/test run in the app dir; Dependabot points at `salone-explorer/package.json`.
+19. Add `salone-explorer/tests/a11y/smoke.spec.ts`.
 20. Update README; commit; push.
-21. Connect the repo to the **existing** Vercel project `tp-isent/ai-led-sdlc-demo` (do not create a new one; Vite preset, `dist`); set `VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com` and `VITE_ATTRACTIONS_SOURCE=file`; map the `slint-ai-led-sdlc.tpgroupsl.com` domain; deploy.
+21. In the **existing** Vercel project `tp-isent/ai-led-sdlc-demo` (do not create a new one), set **Root Directory = `salone-explorer`** (this is what excludes `.claude/` and `docs/` from the build), Framework Preset = Vite, Output = `dist`; set `VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com` and `VITE_ATTRACTIONS_SOURCE=file`; map the `slint-ai-led-sdlc.tpgroupsl.com` domain; deploy.
 22. Validate live URL with Schema.org Validator + Lighthouse.
 
 ### Phase 5 — Supabase provisioning (≈ 10 min)
