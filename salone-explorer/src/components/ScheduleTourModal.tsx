@@ -7,9 +7,10 @@
 // controlled so values survive the form<->confirm toggle. All copy via t().
 import { useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { tourBookings } from '@/lib/account';
+import { tourBookings, payments } from '@/lib/account';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useToast } from '@/lib/toast/ToastProvider';
+import { isPaymentsEnabled, getStripe } from '@/lib/payments';
 import { t, type StringKey } from '@/lib/content';
 import { Button } from './Button';
 
@@ -45,6 +46,10 @@ export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
   const [pending, setPending] = useState<Pending | null>(null);
   const [errorKey, setErrorKey] = useState<StringKey | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // After a booking is created, its id seeds the optional deposit step
+  // (ADR 0008) when payments are enabled; null otherwise.
+  const [createdBookingId, setCreatedBookingId] = useState<string | null>(null);
+  const [paying, setPaying] = useState(false);
 
   function handleOpen() {
     // user is transiently null during the initial session lookup; don't send
@@ -62,6 +67,8 @@ export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
     // Reset submitting too: closing via Escape mid-request must not leave the
     // confirm controls disabled on the next open.
     setSubmitting(false);
+    setCreatedBookingId(null);
+    setPaying(false);
     dialogRef.current?.showModal();
   }
 
@@ -96,25 +103,53 @@ export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
     setPending(candidate);
   }
 
-  // Step 2: the user confirmed; create the booking and toast on success.
+  // Step 2: the user confirmed; create the booking. When payments are enabled,
+  // advance to the optional deposit step; otherwise finish with a toast.
   async function handleConfirm() {
     if (!pending) return;
     setSubmitting(true);
     try {
-      await tourBookings.create({
+      const booking = await tourBookings.create({
         attractionId,
         tourDate: pending.date,
         partySize: pending.partySize,
         notes: pending.notes === '' ? null : pending.notes,
       });
-      dialogRef.current?.close();
       setPending(null);
-      show(t('schedule.success'));
+      if (isPaymentsEnabled()) {
+        setCreatedBookingId(booking.id);
+      } else {
+        dialogRef.current?.close();
+        show(t('schedule.success'));
+      }
     } catch {
       setErrorKey('errors.generic');
     } finally {
       setSubmitting(false);
     }
+  }
+
+  // Optional deposit (ADR 0008): redirect to Stripe-hosted Checkout. The
+  // amount is computed server-side by create-checkout; the booking is marked
+  // paid only by the verified webhook, never by the redirect return.
+  async function handlePayDeposit() {
+    if (!createdBookingId) return;
+    setPaying(true);
+    try {
+      await getStripe(); // loads Stripe.js with the publishable key (SPEC §3)
+      const { url } = await payments.startCheckout(createdBookingId);
+      window.location.href = url;
+    } catch {
+      setErrorKey('payment.error');
+      setPaying(false);
+    }
+  }
+
+  // The user skips the deposit; the booking is already saved.
+  function handleSkipDeposit() {
+    dialogRef.current?.close();
+    setCreatedBookingId(null);
+    show(t('schedule.success'));
   }
 
   return (
@@ -169,6 +204,39 @@ export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
                   setErrorKey(null);
                   setPending(null);
                 }}
+              >
+                {t('schedule.cancel')}
+              </Button>
+            </div>
+          </div>
+        ) : createdBookingId ? (
+          // --- Optional deposit step (ADR 0008; only when payments enabled) ---
+          <div className="flex flex-col gap-4">
+            <h2 id="schedule-title" className="text-xl font-bold">
+              {t('schedule.confirm.title')}
+            </h2>
+            <p className="text-sm text-text-muted">{t('payment.notice')}</p>
+
+            {errorKey && (
+              <p role="alert" className="text-sm text-danger">
+                {t(errorKey)}
+              </p>
+            )}
+
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                onClick={handlePayDeposit}
+                disabled={paying}
+                aria-busy={paying}
+              >
+                {t('payment.cta')}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={paying}
+                onClick={handleSkipDeposit}
               >
                 {t('schedule.cancel')}
               </Button>
