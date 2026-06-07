@@ -4,7 +4,7 @@ layer: cross-layer
 issue: #2
 context_pack: none
 started: 2026-06-06 19:50 EDT
-ended: in-progress
+ended: 2026-06-06 20:35 EDT
 author: Tamba S Lamin
 actor: claude-autonomous
 branch: issue-2-aeo
@@ -78,4 +78,32 @@ sign-off gate before any reviews code.
 
 ## Outcomes
 
+#2 AEO and #3 reviews both built, reviewed, and in PRs to dev.
+
+- #2 AEO -> PR #48 (Closes #2): extended SpeakableSpecification to location +
+  rating; seo-graph test. All four CI gates green.
+- #3 reviews -> PR #49 (Closes #3), per ratified ADR 0004: reviews migration
+  (RLS hardened - own-update gated on status='published' both USING and WITH
+  CHECK), ReviewRepository (listPublished omits user_id), ReviewForm +
+  ReviewList (Realtime, SSG-safe), build-time anon-key snapshot -> graph.ts
+  aggregateRating + Review nodes (serializeJsonLd extracted + </script>
+  escape test). code-reviewer + security-reviewer ran; 1 Medium (RLS WITH
+  CHECK) + 3 Low + code-review items all fixed (commit 2784170). 46 unit
+  tests, a11y 5/5, secret scan clean, three-layer grep zero.
+- Follow-ups filed: #50 (flag + moderator role), #51 (named reviews), #52
+  (redeploy-on-volume hook).
+- Decisions/refinements: pseudonymous reviews (no PII); anon key not
+  service-role for the snapshot (no build secret); snapshot gitignored with
+  force-committed {} default.
+
 ## Next session
+Live + merge (human):
+1. Merge #48 (AEO) -> dev, then #49 (reviews) -> dev (PR #49 shows #48's
+   commit until #48 lands; rebase or merge order resolves it).
+2. Apply supabase/migrations/0001_reviews.sql in Supabase; verify RLS across
+   two accounts (§20 Phase 9), incl. the moderated-review re-publish block.
+3. Redeploy so the snapshot bakes real aggregateRating into JSON-LD.
+4. Still open from earlier: #46 (auth-guard -> main), #43 (migration env ->
+   dev). Phase 6 follow-ups #39-42; dependency triage #38.
+Next delivery phase candidates: #4 email (Phase 10), #5 payments (Phase 11),
+or the reviews follow-ups #50/#51/#52.
