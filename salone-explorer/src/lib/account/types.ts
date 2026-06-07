@@ -54,8 +54,9 @@ export type ReviewStatus = 'published' | 'flagged' | 'removed';
 export type Review = {
   id: string;
   attractionId: string;
-  /** Author's user id; used only to detect the caller's own review. */
-  userId: string;
+  /** Author's user id. Present only on the caller's own review (getOwn);
+   * omitted from public-list rows so visitors never receive others' ids. */
+  userId?: string;
   /** 1-5. */
   rating: number;
   body: string;

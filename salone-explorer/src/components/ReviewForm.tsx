@@ -14,6 +14,9 @@ import { Button } from './Button';
 const MAX_BODY = 2000;
 const RATINGS = [1, 2, 3, 4, 5] as const;
 
+/** Which write the form just completed, so the parent can announce success. */
+export type ReviewSavedAction = 'created' | 'updated' | 'deleted';
+
 /** Postgres unique-violation code for the one-review-per-attraction guard. */
 function isDuplicate(error: unknown): boolean {
   return (
@@ -30,7 +33,7 @@ export function ReviewForm({
 }: {
   attractionId: string;
   existing: Review | null;
-  onSaved: () => void;
+  onSaved: (action: ReviewSavedAction) => void;
 }) {
   const { user, configured, loading } = useAuth();
   const [rating, setRating] = useState<number>(existing?.rating ?? 0);
@@ -76,10 +79,11 @@ export function ReviewForm({
     try {
       if (isEdit) {
         await reviews.updateOwn(existing.id, { rating, body });
+        onSaved('updated');
       } else {
         await reviews.create({ attractionId, rating, body });
+        onSaved('created');
       }
-      onSaved();
     } catch (error) {
       setErrorKey(isDuplicate(error) ? 'reviews.error.duplicate' : 'reviews.error.generic');
     } finally {
@@ -94,7 +98,7 @@ export function ReviewForm({
     try {
       await reviews.deleteOwn(existing.id);
       setRating(0);
-      onSaved();
+      onSaved('deleted');
     } catch {
       setErrorKey('reviews.error.generic');
     } finally {
@@ -107,6 +111,9 @@ export function ReviewForm({
       <h3 className="text-base font-semibold">
         {t(isEdit ? 'reviews.form.editHeading' : 'reviews.form.writeHeading')}
       </h3>
+      {isEdit && (
+        <p className="text-sm text-text-muted">{t('reviews.alreadyReviewed')}</p>
+      )}
 
       <fieldset className="flex flex-col gap-1">
         <legend className="text-sm font-medium">
@@ -128,9 +135,10 @@ export function ReviewForm({
                 value={value}
                 checked={rating === value}
                 onChange={() => setRating(value)}
+                aria-label={`${value} ${t('reviews.ratingOutOf')}`}
                 className="sr-only"
               />
-              {t('reviews.form.ratingStar').replace('{n}', String(value))}
+              {value}
             </label>
           ))}
         </div>

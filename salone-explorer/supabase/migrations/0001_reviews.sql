@@ -30,9 +30,16 @@ alter table public.reviews enable row level security;
 create policy "published reviews read" on public.reviews
   for select using (status = 'published' or auth.uid() = user_id);
 create policy "own review insert" on public.reviews
-  for insert with check (auth.uid() = user_id);
+  for insert with check (auth.uid() = user_id and status = 'published');
+-- Authors may edit only their own PUBLISHED review, and the result must stay
+-- published. This freezes a moderated (flagged/removed) review from the
+-- author side: USING excludes non-published rows, so a user cannot re-publish
+-- or edit a review an operator took down via a direct PostgREST PATCH. Only
+-- the service role (operator) changes status. (Security review, ADR 0004 D2.)
 create policy "own review update" on public.reviews
-  for update using (auth.uid() = user_id);
+  for update
+  using (auth.uid() = user_id and status = 'published')
+  with check (auth.uid() = user_id and status = 'published');
 create policy "own review delete" on public.reviews
   for delete using (auth.uid() = user_id);
 

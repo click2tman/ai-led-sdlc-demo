@@ -234,6 +234,17 @@ function wrap(nodes: (JsonLdNode | undefined)[]): JsonLdNode {
   };
 }
 
+/**
+ * Serialize a JSON-LD graph for embedding in a <script type="application/
+ * ld+json"> tag. Escapes "<" to < so any string node - an FAQ answer, a
+ * description, or a user-submitted review body - containing "</script>" cannot
+ * break out of the script element. "<" is valid inside JSON-LD. This is the
+ * single XSS control for JSON-LD; JsonLd.tsx uses it.
+ */
+export function serializeJsonLd(data: JsonLdNode): string {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 /** Graph for the Home page. */
 export function homeGraph(): JsonLdNode {
   return wrap([

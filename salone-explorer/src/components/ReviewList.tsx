@@ -10,8 +10,15 @@ import { Star } from 'lucide-react';
 import { reviews, type Review } from '@/lib/account';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { t } from '@/lib/content';
-import { ReviewForm } from './ReviewForm';
+import { t, type StringKey } from '@/lib/content';
+import { ReviewForm, type ReviewSavedAction } from './ReviewForm';
+
+/** Success microcopy for each completed write (announced via role=status). */
+const SUCCESS_KEY: Record<ReviewSavedAction, StringKey> = {
+  created: 'reviews.success.created',
+  updated: 'reviews.success.updated',
+  deleted: 'reviews.success.deleted',
+};
 
 /** Localised date for display (data formatting, not content copy). */
 function formatDate(iso: string): string {
@@ -48,6 +55,7 @@ export function ReviewList({ attractionId }: { attractionId: string }) {
   const [own, setOwn] = useState<Review | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [successKey, setSuccessKey] = useState<StringKey | null>(null);
   const configured = isSupabaseConfigured();
   const mounted = useRef(true);
 
@@ -72,6 +80,14 @@ export function ReviewList({ attractionId }: { attractionId: string }) {
     }
   }, [attractionId, user, configured]);
 
+  const handleSaved = useCallback(
+    (action: ReviewSavedAction) => {
+      setSuccessKey(SUCCESS_KEY[action]);
+      void load();
+    },
+    [load],
+  );
+
   useEffect(() => {
     mounted.current = true;
     void load();
@@ -90,7 +106,18 @@ export function ReviewList({ attractionId }: { attractionId: string }) {
       </h2>
       <p className="mt-1 text-text-muted">{t('reviews.intro')}</p>
 
-      <ReviewForm attractionId={attractionId} existing={own} onSaved={load} />
+      <ReviewForm
+        key={own?.id ?? 'new'}
+        attractionId={attractionId}
+        existing={own}
+        onSaved={handleSaved}
+      />
+
+      {successKey && (
+        <p role="status" className="mt-3 text-sm text-success">
+          {t(successKey)}
+        </p>
+      )}
 
       {error ? (
         <p role="alert" className="mt-6 text-sm text-danger">
@@ -112,7 +139,7 @@ export function ReviewList({ attractionId }: { attractionId: string }) {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <Stars rating={review.rating} />
                 <span className="text-xs text-text-muted">
-                  {review.userId === user?.id
+                  {own && review.id === own.id
                     ? t('reviews.you')
                     : t('reviews.author.generic')}{' '}
                   · {formatDate(review.createdAt)}

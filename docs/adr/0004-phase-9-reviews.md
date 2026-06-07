@@ -135,10 +135,14 @@ Concretely:
 
 - Because the SSG build has **no Supabase session and runs the file
   repository**, the build cannot call the browser Supabase client. The
-  snapshot is produced by a **build-time read** using the service-role
-  key (server-side, in the build environment only — never shipped),
-  written to a generated, git-ignored data artifact
-  (e.g. `src/data/reviews.snapshot.json`) that the loader/graph reads at
+  snapshot is produced by a **build-time read** using the **anon key**
+  (resolved at implementation: published reviews are public-read under
+  RLS, so the anon key has exactly the access the aggregate needs and
+  **no service-role secret is introduced into the build** — this
+  supersedes the earlier service-role assumption and resolves Open
+  Question 1, neutralising risk R1), written to a generated, git-ignored
+  data artifact (`src/data/reviews.snapshot.json`, committed as an empty
+  `{}` default) that the graph reads at
   prerender time. If the snapshot is absent (e.g. local build with no
   Supabase configured), `graph.ts` **falls back to the existing static
   `attraction.rating` / `attraction.reviewCount`** — the Phase 1
@@ -186,9 +190,13 @@ top-level lib, to reuse the established pattern and barrel.
 - Export via `src/lib/account/index.ts` as `reviews: ReviewRepository`.
 
 The **aggregate** the JSON-LD needs at build time is computed by a
-**separate build-time reader** (service role), not this browser
-repository — keep the two read paths distinct so the anon client never
-needs elevated access.
+**separate build-time reader** (anon key; published reviews are
+public-read), not this browser repository — keep the two read paths
+distinct. Note: Supabase Realtime `postgres_changes` filters are
+single-column, so `subscribe` filters on `attraction_id` only and relies
+on the RLS-gated `listPublished` refetch for the published view; the
+original "filtered to ... `status=published`" wording was not achievable
+in one filter.
 
 ### D5 — Security
 
@@ -211,9 +219,13 @@ needs elevated access.
 - **Moderation gating:** public visibility is enforced by the RLS
   `select` predicate (`status = 'published' ...`), not by client
   filtering — a removed review is invisible at the data layer.
-- **No new secret in the client.** The service-role key used for the
-  build-time aggregate read exists **only** in the build environment;
-  the browser keeps the anon key (`isSupabaseConfigured`).
+- **No new secret anywhere.** The build-time aggregate read uses the
+  **anon key** (published reviews are public-read), so there is no
+  service-role key in the build or the client. The browser keeps the
+  anon key (`isSupabaseConfigured`).
+- **No other-user ids exposed.** `listPublished` omits `user_id`, so a
+  visitor never receives other reviewers' auth UUIDs (the form's own
+  review is matched by id via the separately-fetched `getOwn`).
 
 ### D6 — Content keys and graph changes
 
@@ -292,16 +304,27 @@ Follow-on work (separate issues, not Phase 9):
   saved/bookings; the `src/lib/account/` module already owns that pattern
   and barrel. A new tree would duplicate structure.
 
-## Open questions / stop-and-ask (human sign-off required)
+## Open questions — RESOLVED at ratification (2026-06-06)
 
-1. **Build-time service-role read** introduces a build-env secret and
-   couples the build to Supabase. Confirm this is acceptable vs. simply
-   keeping the static `attraction.rating` in JSON-LD and treating the
-   live list as humans-only (no JSON-LD review feed at all in Phase 9).
-   This is the single biggest tradeoff in the ADR.
-2. **D1.3 enum-vs-check divergence** from the §6.3 convention — confirm.
-3. **Migration file location/naming** (`supabase/migrations/0001_*.sql`
-   vs. a flat `supabase/reviews.sql`) — confirm the project's preferred
-   layout, since §6.3 currently ships as a single `schema.sql`.
-4. Number of `Review` nodes to emit per page (N) and ordering (newest
-   vs. highest-rated) — a content/SEO decision.
+1. **Build-time read.** RESOLVED: use a **build-time snapshot** baked into
+   the prerendered HTML. Refined at implementation to use the **anon key**
+   (published reviews are public-read), so there is **no service-role
+   secret in the build** — this neutralises risk R1. Fallback to the
+   static `attraction.rating` when the snapshot is empty.
+2. **enum-vs-check.** RESOLVED: `status` is `text + check` (D1.3).
+3. **Migration layout.** RESOLVED: versioned dir,
+   `supabase/migrations/0001_reviews.sql`; `schema.sql` (§6.3) untouched.
+4. **Review nodes per page.** RESOLVED: newest **5** published Review
+   nodes; `aggregateRating` covers all published.
+
+### Implementation deltas from the draft (recorded for traceability)
+- **Pseudonymous reviews (refines D6):** profiles are not publicly
+  readable and `display_name` is largely unset, so Phase 9 reviews carry
+  no author name on-page or in JSON-LD (`author` is a generic Person).
+  Named reviews are a tracked follow-up.
+- **Anon key, not service-role (refines D3/D5/R1):** see above.
+- **RLS update hardening (security review):** the `own review update`
+  policy gates BOTH `using` and `with check` on `status = 'published'`,
+  so an author cannot edit or re-publish a review an operator took down.
+- **`listPublished` omits `user_id`** so other users' auth UUIDs never
+  reach the client.

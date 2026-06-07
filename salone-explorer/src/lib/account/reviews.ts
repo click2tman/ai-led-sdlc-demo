@@ -7,10 +7,11 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { NewReview, Review, ReviewStatus } from './types';
 
-/** Raw public.reviews row (snake_case, §6.6 columns + updated_at). */
+/** Raw public.reviews row (snake_case, §6.6 columns + updated_at). user_id is
+ * absent on public-list reads (it is not selected; see PUBLIC_COLUMNS). */
 type ReviewRow = {
   id: string;
-  user_id: string;
+  user_id?: string;
   attraction_id: string;
   rating: number;
   body: string;
@@ -19,7 +20,11 @@ type ReviewRow = {
   updated_at: string;
 };
 
+// Owner reads/writes include user_id (the caller owns the row); the public
+// list deliberately omits it so a visitor never receives other users' auth
+// UUIDs (security review; pseudonymity per ADR 0004 D6).
 const COLUMNS = 'id, user_id, attraction_id, rating, body, status, created_at, updated_at';
+const PUBLIC_COLUMNS = 'id, attraction_id, rating, body, status, created_at, updated_at';
 
 /** Map a database row to the domain Review. */
 function toReview(row: ReviewRow): Review {
@@ -76,7 +81,7 @@ export const supabaseReviewRepository: ReviewRepository = {
   async listPublished(attractionId) {
     const { data, error } = await getSupabase()
       .from('reviews')
-      .select(COLUMNS)
+      .select(PUBLIC_COLUMNS)
       .eq('attraction_id', attractionId)
       .eq('status', 'published')
       .order('created_at', { ascending: false });
@@ -138,6 +143,10 @@ export const supabaseReviewRepository: ReviewRepository = {
   subscribe(attractionId, onChange) {
     if (!isSupabaseConfigured()) return () => {};
     const supabase = getSupabase();
+    // Realtime postgres_changes filters are single-column, so we cannot also
+    // filter status=published here; onChange triggers a refetch of
+    // listPublished (which is published-gated by RLS), so a moderation change
+    // simply causes one extra reload rather than leaking non-published rows.
     const channel = supabase
       .channel(`reviews:${attractionId}`)
       .on(

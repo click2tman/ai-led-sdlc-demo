@@ -103,6 +103,24 @@ describe('reviews repository', () => {
     ]);
   });
 
+  it('listPublished never selects user_id (no other-user ids leak)', async () => {
+    client.setResult({ data: [], error: null });
+    await reviews.listPublished('tiwai-island');
+    const [columns] = allArgsOf('select')[0] as [string];
+    expect(columns).not.toContain('user_id');
+  });
+
+  it('getOwn returns the caller review of any status, scoped to the user', async () => {
+    client.setResult({ data: { ...row, user_id: 'user-1', status: 'flagged' }, error: null });
+    const result = await reviews.getOwn('tiwai-island');
+    expect(result?.status).toBe('flagged');
+    expect(result?.userId).toBe('user-1');
+    expect(allArgsOf('eq')).toEqual([
+      ['attraction_id', 'tiwai-island'],
+      ['user_id', 'user-1'],
+    ]);
+  });
+
   it('create sets user_id from the session', async () => {
     client.setResult({ data: { ...row, user_id: 'user-1' }, error: null });
     await reviews.create({ attractionId: 'tiwai-island', rating: 4, body: 'Great trip.' });

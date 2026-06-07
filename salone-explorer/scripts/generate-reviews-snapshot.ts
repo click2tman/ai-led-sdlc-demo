@@ -7,7 +7,7 @@
 // (refines ADR R1). When Supabase is unconfigured it writes an empty snapshot
 // so graph.ts falls back to the static attraction.rating and the build never
 // fails. Run before the bundle in package.json build.
-import { existsSync, writeFileSync } from 'node:fs';
+import { existsSync, renameSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
@@ -43,12 +43,16 @@ type AttractionSnapshot = {
   recent: { rating: number; body: string; createdAt: string }[];
 };
 
-/** Write the snapshot, replacing the file atomically (sorted keys for diffs). */
+/** Write the snapshot atomically (write to a temp file, then rename) with
+ * sorted keys for stable diffs, so an interrupted run never leaves a
+ * half-written file that would break the JSON import in graph.ts. */
 function write(snapshot: Record<string, AttractionSnapshot>): void {
   const sorted = Object.fromEntries(
     Object.entries(snapshot).sort(([a], [b]) => a.localeCompare(b)),
   );
-  writeFileSync(outPath, `${JSON.stringify(sorted, null, 2)}\n`, 'utf8');
+  const tmp = `${outPath}.tmp`;
+  writeFileSync(tmp, `${JSON.stringify(sorted, null, 2)}\n`, 'utf8');
+  renameSync(tmp, outPath);
 }
 
 async function run(): Promise<void> {
@@ -110,8 +114,15 @@ async function run(): Promise<void> {
 }
 
 run().catch((error) => {
-  // A read failure must not break the deploy: keep the existing snapshot
-  // (or the committed empty default) and surface the error loudly.
-  console.error('generate-reviews-snapshot failed:', error);
-  process.exit(1);
+  // The build must never fail for lack of live review data (ADR 0004 D3).
+  // Surface the cause loudly, reset to an empty snapshot (graph.ts then falls
+  // back to the static rating), and exit 0. The committed {} default means a
+  // valid file is always present even if this best-effort write also fails.
+  console.error('generate-reviews-snapshot failed; using empty snapshot:', error);
+  try {
+    write({});
+  } catch {
+    // Filesystem unavailable; the committed default remains in place.
+  }
+  process.exit(0);
 });
