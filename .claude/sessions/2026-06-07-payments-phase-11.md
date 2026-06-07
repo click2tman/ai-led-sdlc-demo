@@ -4,7 +4,7 @@ layer: cross-layer
 issue: #5
 context_pack: none
 started: 2026-06-07 18:10 EDT
-ended: in-progress
+ended: 2026-06-07 18:50 EDT
 author: Tamba S Lamin
 actor: claude-autonomous
 branch: issue-5-payments
@@ -58,5 +58,15 @@ verified webhook (redirect param cosmetic).
 ## Open questions
 
 ## Outcomes
+Phase 11 Stripe deposit shipped per ADR 0008: create-checkout + stripe-webhook
+Edge Functions, payments table (migration 0004, RLS, no client write, partial
+unique index), client repository + gated deposit step, TEST-mode behind
+VITE_PAYMENTS_ENABLED. security + code review findings all addressed (no
+blockers; race/double-session/a11y/redirect-toast hardening). PR #60 -> dev.
+Closes #5. Live-infra (Stripe keys/secrets, deploy, webhook registration,
+migration; live-mode disclaimer) documented.
 
 ## Next session
+Live-infra to activate payments (human). Remaining: reviews follow-ups
+#50/#51/#52, #39 RLS integration test, eslint 10 (#32, blocked on jsx-a11y). A
+dev->main promotion would ship React 19 + deps + email (#59) + payments (#60).
