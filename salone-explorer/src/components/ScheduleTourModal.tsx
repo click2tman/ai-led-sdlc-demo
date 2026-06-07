@@ -31,13 +31,16 @@ function todayIso(): string {
 
 export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [errorKey, setErrorKey] = useState<StringKey | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
   function handleOpen() {
+    // user is transiently null during the initial session lookup; don't send
+    // an already-signed-in user to /signin if they click quickly after load.
+    if (loading) return;
     if (!user) {
       navigate('/signin');
       return;

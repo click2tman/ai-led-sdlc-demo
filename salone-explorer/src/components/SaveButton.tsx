@@ -32,7 +32,7 @@ export function SaveButton({
   labels,
 }: SaveButtonProps) {
   const navigate = useNavigate();
-  const { user, configured } = useAuth();
+  const { user, configured, loading } = useAuth();
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   const [announcement, setAnnouncement] = useState('');
@@ -68,6 +68,9 @@ export function SaveButton({
   }, [attractionId, kind, user, configured]);
 
   async function handleClick() {
+    // While the initial session lookup is in flight, user is transiently null;
+    // ignore the click rather than misrouting an already-signed-in user.
+    if (loading) return;
     if (!user) {
       navigate('/signin');
       return;
