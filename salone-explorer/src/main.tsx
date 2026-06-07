@@ -1,18 +1,24 @@
-// React entry point (SPEC §19 P3): data router (createBrowserRouter with
-// repository-backed loaders) wrapped in HelmetProvider for per-route head
-// management. Route config is shared with the SSG renderer (src/routes.tsx).
-// When the page was pre-rendered, the loader data is seeded from
-// window.__staticRouterHydrationData so useLoaderData() resolves on first
-// render. AuthProvider (Phase 6) owns the Supabase session for the tree.
+// React entry point (SPEC §19 P3). Data router (createBrowserRouter with
+// repository-backed loaders); route config is shared with the SSG renderer
+// (src/routes.tsx). When the page was pre-rendered, the loader data is seeded
+// from window.__staticRouterHydrationData so useLoaderData() resolves on first
+// render. AuthProvider (Phase 6) owns the Supabase session; ToastProvider the
+// transient notifications. Per-route <head> metadata is React 19 native
+// (SeoHead), so there is no head provider (ADR 0006).
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import { routes } from './routes';
 import { AuthProvider } from './lib/auth/AuthProvider';
 import { ToastProvider } from './lib/toast/ToastProvider';
-import type { HydrationData } from './entry-server';
+
+/** The router hydration state the prerender serialized into the page. */
+type HydrationData = {
+  loaderData: Record<string, unknown>;
+  actionData: Record<string, unknown> | null;
+  errors: Record<string, unknown> | null;
+};
 
 declare global {
   interface Window {
@@ -31,12 +37,10 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <HelmetProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <RouterProvider router={router} />
-        </ToastProvider>
-      </AuthProvider>
-    </HelmetProvider>
+    <AuthProvider>
+      <ToastProvider>
+        <RouterProvider router={router} />
+      </ToastProvider>
+    </AuthProvider>
   </StrictMode>,
 );

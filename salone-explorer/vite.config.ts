@@ -12,11 +12,11 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  ssr: {
-    // Bundle these into the SSG output (scripts/prerender.ts) rather than
-    // externalizing them: they are CommonJS and Node's ESM named-import
-    // interop does not resolve their named exports at runtime.
-    noExternal: ['react-helmet-async'],
+  build: {
+    // Emit dist/.vite/manifest.json so the prerender (scripts/prerender.ts)
+    // resolves the hashed entry JS + CSS for the full-document render
+    // (ADR 0006) without parsing dist/index.html.
+    manifest: true,
   },
   test: {
     environment: 'jsdom',

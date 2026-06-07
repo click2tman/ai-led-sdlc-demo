@@ -5,7 +5,6 @@ import { useLoaderData } from 'react-router-dom';
 import { attractions, t } from '@/lib/content';
 import type { Attraction } from '@/data/types';
 import { SeoHead } from '@/seo/SeoHead';
-import { homeGraph } from '@/seo/graph';
 import { AttractionCard } from '@/components/AttractionCard';
 import { DisclaimerBanner } from '@/components/DisclaimerBanner';
 import { buttonVariants } from '@/components/Button';
@@ -24,7 +23,6 @@ export function HomePage() {
         title={`${t('app.name')} - ${t('app.tagline')}`}
         description={t('brand.site.description')}
         path="/"
-        jsonLd={homeGraph()}
       />
       <DisclaimerBanner />
 

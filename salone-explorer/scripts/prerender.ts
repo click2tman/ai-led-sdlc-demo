@@ -1,14 +1,15 @@
-// Static pre-rendering (SPEC §13.1). Browser-free SSG: consumes the Vite SSR
-// bundle (dist-ssr/entry-server.js) produced by `vite build --ssr`, renders
-// each public route to static HTML via react-dom/server, and writes
-// dist/<route>/index.html for crawlers and LLM ingestion. Runs on the Vercel
-// build image with no Chromium dependency (supersedes the Playwright approach
-// in ADR 0002).
+// Static pre-rendering (SPEC §13.1, ADR 0006). Browser-free SSG: consumes the
+// Vite SSR bundle (dist-ssr/entry-server.js), which renders each public route
+// to a COMPLETE static HTML document (React 19 full-document render, no
+// template surgery), and writes dist/<route>/index.html for crawlers and LLM
+// ingestion. The hashed client JS/CSS come from the Vite build manifest. A
+// JSON-LD presence assertion fails the build if a route that must carry a
+// graph emits none in <head>. Runs on the Vercel build image; no Chromium.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import type { Attraction } from '../src/data/types';
-import type { RenderResult } from '../src/entry-server';
+import type { Assets, RenderResult } from '../src/entry-server';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(here, '..');
@@ -21,46 +22,50 @@ if (!Array.isArray(parsed) || parsed.some((a) => !/^[a-z0-9-]+$/.test(a.id))) {
   throw new Error('prerender: attractions.json must be an array of records with kebab-case ids.');
 }
 
-const routes: string[] = [
-  '/',
-  '/about',
-  '/signin',
-  '/signup',
-  ...parsed.map((a) => `/attractions/${a.id}`),
-];
+const attractionRoutes = parsed.map((a) => `/attractions/${a.id}`);
+const routes: string[] = ['/', '/about', '/signin', '/signup', ...attractionRoutes];
 
-/** Inject rendered app HTML, Helmet head, and hydration data into the shell. */
-function compose(template: string, result: RenderResult): string {
-  const { appHtml, helmet, hydrationData } = result;
-  const head =
-    helmet.title.toString() +
-    helmet.meta.toString() +
-    helmet.link.toString() +
-    helmet.script.toString();
-  // Seed the client router with the loader data so useLoaderData() resolves on
-  // first render. Escape "<" so the JSON can't break out of the script tag.
-  const hydration =
-    `<script>window.__staticRouterHydrationData=` +
-    `${JSON.stringify(hydrationData).replace(/</g, '\\u003c')};</script>`;
-  return template
-    // Drop the template's static title/description; Helmet supplies them.
-    .replace(/<title>[\s\S]*?<\/title>/, '')
-    .replace(/<meta name="description"[^>]*>/, '')
-    .replace('</head>', `${head}</head>`)
-    .replace(/(<script type="module")/, `${hydration}$1`)
-    .replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`);
+// Routes whose <head> must carry a JSON-LD graph (ADR 0006 assertion). signin
+// and signup are noindex and carry none.
+const jsonLdRoutes = new Set<string>(['/', '/about', ...attractionRoutes]);
+
+type ManifestEntry = { file: string; css?: string[]; isEntry?: boolean };
+
+/** Hashed entry JS + CSS from dist/.vite/manifest.json (build.manifest). */
+function readAssets(): Assets {
+  const manifest = JSON.parse(
+    readFileSync(resolve(distDir, '.vite/manifest.json'), 'utf8'),
+  ) as Record<string, ManifestEntry>;
+  const entry = Object.values(manifest).find((e) => e.isEntry);
+  if (!entry) {
+    throw new Error('prerender: no isEntry record in dist/.vite/manifest.json.');
+  }
+  return {
+    js: [`/${entry.file}`],
+    css: (entry.css ?? []).map((file) => `/${file}`),
+  };
 }
 
 async function run(): Promise<void> {
-  const template = readFileSync(resolve(distDir, 'index.html'), 'utf8');
+  const assets = readAssets();
   const entryUrl = pathToFileURL(resolve(appRoot, 'dist-ssr/entry-server.js')).href;
   const { render } = (await import(entryUrl)) as {
-    render: (url: string) => Promise<RenderResult>;
+    render: (url: string, assets: Assets) => Promise<RenderResult>;
   };
 
   for (const route of routes) {
-    const result = await render(route);
-    const html = compose(template, result);
+    const { html } = await render(route, assets);
+
+    if (jsonLdRoutes.has(route)) {
+      const headEnd = html.indexOf('</head>');
+      if (headEnd === -1) {
+        throw new Error(`prerender: route ${route} produced no </head> - render broken.`);
+      }
+      if (!html.slice(0, headEnd).includes('application/ld+json')) {
+        throw new Error(`prerender: route ${route} is missing its JSON-LD in <head>.`);
+      }
+    }
+
     const outDir = route === '/' ? distDir : resolve(distDir, route.slice(1));
     mkdirSync(outDir, { recursive: true });
     writeFileSync(resolve(outDir, 'index.html'), html);

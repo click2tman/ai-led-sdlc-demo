@@ -5,7 +5,6 @@ import { attractions, t } from '@/lib/content';
 import { useLoaderData } from 'react-router-dom';
 import type { Attraction } from '@/data/types';
 import { SeoHead } from '@/seo/SeoHead';
-import { aboutGraph } from '@/seo/graph';
 
 export async function aboutLoader(): Promise<{ items: Attraction[] }> {
   return { items: await attractions.getAll() };
@@ -24,7 +23,6 @@ export function AboutPage() {
         title={`${t('about.title')} - ${t('app.name')}`}
         description={t('brand.site.description')}
         path="/about"
-        jsonLd={aboutGraph()}
       />
       <article className="mx-auto max-w-3xl px-4 py-12">
         <h1 className="text-3xl font-bold md:text-4xl">{t('about.title')}</h1>
