@@ -12,10 +12,10 @@ type JsonLdProps = {
 };
 
 export function JsonLd({ data }: JsonLdProps) {
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }}
-    />
-  );
+  // serializeJsonLd escapes "<" (the JSON-LD XSS control, unit-tested); the
+  // value is our own serialized Schema.org graph, never raw user HTML. This is
+  // the standard, safe way to embed JSON-LD in React.
+  const html = serializeJsonLd(data);
+  // nosemgrep -- html is escaped by serializeJsonLd (the JSON-LD XSS control)
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: html }} />;
 }
