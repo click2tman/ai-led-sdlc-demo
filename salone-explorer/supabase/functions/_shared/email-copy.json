@@ -1,0 +1,14 @@
+{
+  "email.cancelled.heading": "Tour request cancelled",
+  "email.cancelled.intro": "Your tour request has been cancelled. You can schedule a new visit any time from your account.",
+  "email.cancelled.subject": "Your Salone Explorer tour request was cancelled",
+  "email.created.heading": "Tour request received",
+  "email.created.intro": "Thanks for planning a visit. We have recorded your tour request and will follow up to confirm availability.",
+  "email.created.subject": "Your Salone Explorer tour request",
+  "email.details.attraction": "Attraction",
+  "email.details.date": "Date",
+  "email.details.heading": "Booking details",
+  "email.details.party": "Party size",
+  "email.disclaimer": "This is a demonstration project for educational purposes and is not an official tour-booking service.",
+  "email.signature": "Salone Explorer - a FambulTik guide by TpGroup (SL) Limited"
+}

@@ -29,4 +29,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test
+      # Fail if the Edge Function email-copy snapshot drifts from the content
+      # layer (ADR 0007 D2): regenerate and assert no diff.
+      - run: npm run check:email-copy
       - run: npm run build

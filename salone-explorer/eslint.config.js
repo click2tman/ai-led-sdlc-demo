@@ -10,8 +10,11 @@ import jsxA11y from 'eslint-plugin-jsx-a11y';
 import globals from 'globals';
 
 export default tseslint.config(
-  // Build artifacts and vendored code are never linted.
-  { ignores: ['dist', 'dist-ssr', 'node_modules', 'coverage'] },
+  // Build artifacts and vendored code are never linted. supabase/functions is
+  // Deno code (remote imports, Deno globals) with its own toolchain (deno
+  // lint); its testable logic lives in _shared/*.ts and is covered by vitest +
+  // tsc via the app's test imports.
+  { ignores: ['dist', 'dist-ssr', 'node_modules', 'coverage', 'supabase/functions'] },
 
   // Base recommended sets (equivalent to the old `extends`).
   js.configs.recommended,
