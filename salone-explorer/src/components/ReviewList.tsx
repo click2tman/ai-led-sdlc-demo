@@ -10,6 +10,7 @@ import { Star } from 'lucide-react';
 import { reviews, type Review } from '@/lib/account';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useToast } from '@/lib/toast/ToastProvider';
 import { t, type StringKey } from '@/lib/content';
 import { ReviewForm, type ReviewSavedAction } from './ReviewForm';
 
@@ -55,7 +56,7 @@ export function ReviewList({ attractionId }: { attractionId: string }) {
   const [own, setOwn] = useState<Review | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [successKey, setSuccessKey] = useState<StringKey | null>(null);
+  const { show } = useToast();
   const configured = isSupabaseConfigured();
   const mounted = useRef(true);
 
@@ -82,10 +83,10 @@ export function ReviewList({ attractionId }: { attractionId: string }) {
 
   const handleSaved = useCallback(
     (action: ReviewSavedAction) => {
-      setSuccessKey(SUCCESS_KEY[action]);
+      show(t(SUCCESS_KEY[action]));
       void load();
     },
-    [load],
+    [load, show],
   );
 
   useEffect(() => {
@@ -112,12 +113,6 @@ export function ReviewList({ attractionId }: { attractionId: string }) {
         existing={own}
         onSaved={handleSaved}
       />
-
-      {successKey && (
-        <p role="status" className="mt-3 text-sm text-success">
-          {t(successKey)}
-        </p>
-      )}
 
       {error ? (
         <p role="alert" className="mt-6 text-sm text-danger">
