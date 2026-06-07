@@ -6,8 +6,41 @@
 import type { Attraction } from '@/data/types';
 import { absoluteUrl, siteUrl, attractionPath } from '@/lib/site';
 import { t } from '@/lib/content';
+import reviewsSnapshot from '@/data/reviews.snapshot.json';
 
 type JsonLdNode = Record<string, unknown>;
+
+/** Per-attraction review aggregate baked at build time (ADR 0004 D3). */
+type AttractionSnapshot = {
+  count: number;
+  mean: number;
+  recent: { rating: number; body: string; createdAt: string }[];
+};
+
+// Build-time snapshot of published reviews. Empty ({}) when Supabase was
+// unconfigured at build, in which case aggregateRating falls back to the
+// static attraction.rating/reviewCount.
+const snapshot = reviewsSnapshot as Record<string, AttractionSnapshot>;
+
+/** A pseudonymous Review node (ADR 0004 D6: no author PII). */
+function reviewNode(review: {
+  rating: number;
+  body: string;
+  createdAt: string;
+}): JsonLdNode {
+  return {
+    '@type': 'Review',
+    reviewRating: {
+      '@type': 'Rating',
+      ratingValue: review.rating,
+      bestRating: 5,
+      worstRating: 1,
+    },
+    reviewBody: review.body,
+    datePublished: review.createdAt.slice(0, 10),
+    author: { '@type': 'Person', name: t('reviews.author.generic') },
+  };
+}
 
 const ORG_ID = `${siteUrl}/#organization`;
 const TIC_ID = `${siteUrl}/#tourist-info`;
@@ -151,7 +184,22 @@ export function touristAttraction(attraction: Attraction): JsonLdNode {
       contentUrl: attraction.videoUrl,
     };
   }
-  if (attraction.reviewCount > 0) {
+  // Prefer the build-time review snapshot (real published reviews) for
+  // aggregateRating + Review nodes; fall back to the static seed rating when
+  // the snapshot has no data for this attraction (ADR 0004 D3).
+  const reviews = snapshot[attraction.id];
+  if (reviews && reviews.count > 0) {
+    node.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: reviews.mean,
+      reviewCount: reviews.count,
+      bestRating: 5,
+      worstRating: 1,
+    };
+    if (reviews.recent.length > 0) {
+      node.review = reviews.recent.map(reviewNode);
+    }
+  } else if (attraction.reviewCount > 0) {
     node.aggregateRating = {
       '@type': 'AggregateRating',
       ratingValue: attraction.rating,

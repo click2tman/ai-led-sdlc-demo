@@ -55,6 +55,23 @@ sign-off gate before any reviews code.
   whether to do a build-time service-role read for JSON-LD. Awaiting sign-off
   before building #3.
 
+- 2026-06-06 20:15 EDT - #3 reviews built per ADR 0004 (branch
+  issue-3-reviews off issue-2-aeo). Migration 0001_reviews.sql (table+RLS+
+  updated_at trigger); Review types + ReviewRepository (list/getOwn/create/
+  updateOwn/deleteOwn/subscribe, user_id from session, Realtime no-op when
+  unconfigured); reviews.* content keys; ReviewForm (auth-gated, radio rating,
+  2000-char body, duplicate->reviews.error.duplicate) + ReviewList (client-
+  only, Realtime, SSG-safe) wired under FAQ on the detail page; build-time
+  snapshot generator + graph.ts reviewNode()/snapshot aggregateRating with
+  static fallback; package.json build runs the generator first. 6 new repo
+  tests (41 total). Gates green: lint, typecheck, build:prerender (generator
+  degraded gracefully on PGRST205 since the live table isn't applied yet),
+  a11y 5/5, three-layer grep zero, secret scan clean.
+  Refinement to ADR: snapshot reader uses the ANON key (published reviews are
+  public-read), so NO build-env service-role secret (neutralises ADR R1).
+  Deviation from ADR D6: reviews are pseudonymous (generic author, no PII) -
+  profiles aren't publicly readable; named reviews deferred to a follow-up.
+
 ## Findings
 
 ## Open questions

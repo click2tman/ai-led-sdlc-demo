@@ -1,7 +1,8 @@
-// User-scoped domain types (SPEC §6.3). Mirror the Supabase tables
-// profiles, saved_attractions, and tour_bookings as camelCase domain
-// objects. These are the contracts the account repositories return and the
-// UI consumes; the snake_case row shapes stay private to the repositories.
+// User-scoped domain types (SPEC §6.3, and §6.6 reviews via ADR 0004).
+// Mirror the Supabase tables (profiles, saved_attractions, tour_bookings,
+// reviews) as camelCase domain objects. These are the contracts the account
+// repositories return and the UI consumes; the snake_case row shapes stay
+// private to the repositories.
 
 /** A saved attraction is either a bookmark or a favorite (§6.3 saved_kind). */
 export type SavedKind = 'bookmark' | 'favorite';
@@ -43,4 +44,35 @@ export type NewTourBooking = {
   tourDate: string;
   partySize: number;
   notes: string | null;
+};
+
+/** Moderation lifecycle of a review (§6.6 reviews.status; ADR 0004 D1). */
+export type ReviewStatus = 'published' | 'flagged' | 'removed';
+
+/** A user-authored review of an attraction (§6.6 public.reviews). Phase 9
+ * reviews are pseudonymous: no author name is carried (ADR 0004 D6 note). */
+export type Review = {
+  id: string;
+  attractionId: string;
+  /** Author's user id; used only to detect the caller's own review. */
+  userId: string;
+  /** 1-5. */
+  rating: number;
+  body: string;
+  status: ReviewStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+/** Fields a user supplies to create a review; the rest are server-defaulted. */
+export type NewReview = {
+  attractionId: string;
+  rating: number;
+  body: string;
+};
+
+/** Aggregate of published reviews for an attraction (drives aggregateRating). */
+export type AttractionRating = {
+  mean: number;
+  count: number;
 };
