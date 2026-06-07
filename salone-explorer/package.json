@@ -36,7 +36,7 @@
     "@types/node": "^20.17.10",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^6.0.2",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.39.4",
     "eslint-plugin-jsx-a11y": "^6.10.2",
@@ -49,10 +49,10 @@
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.60.1",
-    "vite": "^5.4.11",
-    "vitest": "^2.1.8"
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^20.19.0 || >=22.12.0"
   }
 }
