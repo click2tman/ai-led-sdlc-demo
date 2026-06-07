@@ -4,7 +4,7 @@ layer: cross-layer
 issue: #42
 context_pack: none
 started: 2026-06-06 21:16 EDT
-ended: in-progress
+ended: 2026-06-06 21:24 EDT
 author: Tamba S Lamin
 actor: claude-autonomous
 branch: chore-phase-6-followups
@@ -52,5 +52,10 @@ approval to proceed); schema.sql updated to match.
 ## Open questions
 
 ## Outcomes
+Three Phase 6 follow-ups (#40 toast, #41 confirm step, #42 notes constraint)
+shipped on PR #54 -> dev. Gates green (48 tests, a11y 5/5). Post-merge:
+apply migrations/0002 in Supabase. Remaining tracked work: dep triage #38,
+#39 RLS integration test, reviews follow-ups #50/#51/#52; delivery phases
+#4 email, #5 payments.
 
 ## Next session
