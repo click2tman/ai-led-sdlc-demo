@@ -13,7 +13,6 @@ import { attractions, t, getImageCredit } from '@/lib/content';
 import type { Attraction } from '@/data/types';
 import { attractionPath } from '@/lib/site';
 import { SeoHead } from '@/seo/SeoHead';
-import { attractionGraph } from '@/seo/graph';
 import { RatingBadge } from '@/components/RatingBadge';
 import { HoursBlock } from '@/components/HoursBlock';
 import { DirectionsButton } from '@/components/DirectionsButton';
@@ -70,7 +69,6 @@ export function AttractionDetailPage() {
         path={attractionPath(attraction.id)}
         image={attraction.images[0]}
         type="article"
-        jsonLd={attractionGraph(attraction)}
       />
 
       <div className="mx-auto max-w-5xl px-4 py-8">
