@@ -1,6 +1,6 @@
 // SSG entry (SPEC §13.1, ADR 0006; supersedes the Helmet-context approach).
-// Renders each route as a FULL <html> document via react-dom/static
-// `prerenderToNodeStream`, so React 19 hoists the native <title>/<meta>/<link>
+// Renders each route as a FULL <html> document via react-dom/server
+// `renderToString`, so React 19 hoists the native <title>/<meta>/<link>
 // emitted by SeoHead into <head>. No react-helmet-async. JSON-LD is placed in
 // <head> explicitly from the matched route's `handle` (React 19 does not hoist
 // application/ld+json). Built with `vite build --ssr`, invoked by

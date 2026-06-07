@@ -57,8 +57,11 @@ async function run(): Promise<void> {
     const { html } = await render(route, assets);
 
     if (jsonLdRoutes.has(route)) {
-      const head = html.slice(0, html.indexOf('</head>'));
-      if (!head.includes('application/ld+json')) {
+      const headEnd = html.indexOf('</head>');
+      if (headEnd === -1) {
+        throw new Error(`prerender: route ${route} produced no </head> - render broken.`);
+      }
+      if (!html.slice(0, headEnd).includes('application/ld+json')) {
         throw new Error(`prerender: route ${route} is missing its JSON-LD in <head>.`);
       }
     }

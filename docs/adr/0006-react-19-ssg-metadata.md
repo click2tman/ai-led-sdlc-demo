@@ -26,7 +26,7 @@ What is true today:
   `<HelmetProvider context={helmetContext}>` and reads
   `helmetContext.helmet` to serialize the head. `prerender.ts`'s `compose()`
   concatenates `helmet.title/meta/link/script` strings into `<head>`.
-- `src/seo/graph.ts` `serializeJsonLd()` escapes `<` to `<`. This is
+- `src/seo/graph.ts` `serializeJsonLd()` escapes `<` to `\u003c`. This is
   the **single XSS control** for JSON-LD and prevents a `</script>`
   breakout from any string node (FAQ answers, descriptions, or — post
   Phase 9 — user-submitted review bodies surfaced in `aggregateRating`/
@@ -72,8 +72,12 @@ document at prerender time, and removing `react-helmet-async` entirely.**
    subtree-into-template injection with a **full-document render**.
    `entry-server.tsx` renders a root `Document` component that returns the
    complete `<html><head>…</head><body><div id="root">…</div></body></html>`,
-   using **`react-dom/static` `prerenderToNodeStream`** (Node SSG API;
-   `renderToString` is superseded for SSG in React 19). The per-route
+   using **`react-dom/server` `renderToString`** (as shipped). The draft
+   proposed `react-dom/static` `prerenderToNodeStream`, but its prelude
+   stream type conflicted with the Node collector; `renderToString` performs
+   the same React 19 metadata hoisting for a full document, returns a string
+   directly, and - since the client uses `createRoot` not `hydrateRoot` -
+   leaves harmless hydration markers. The per-route
    `<title>/<meta>/<link>` are emitted as **native React 19 tags** by a
    rewritten `SeoHead` (no `<Helmet>`); React hoists them into the
    document `<head>`. The static head shell that lives in `index.html`
@@ -126,9 +130,9 @@ document at prerender time, and removing `react-helmet-async` entirely.**
 4. **React 19 runtime deltas (resolves tension 4).**
    - `createRoot` + `StrictMode` are already in use (`main.tsx`) — no
      change.
-   - `renderToString` is replaced by `react-dom/static`
-     `prerenderToNodeStream` for the SSG path (full-document, async,
-     awaits data — fits our loader-driven routes).
+   - `renderToString` (react-dom/server) renders the full document for the
+     SSG path; our loaders are already resolved by the static handler, so no
+     async/streaming renderer is needed.
    - **ref-as-prop**: `ScheduleTourModal.tsx` uses a plain `useRef`
      on a native `<dialog>` (`showModal()`/`close()`), not `forwardRef`,
      so the ref change is a no-op for us. `forwardRef` is deprecated-not-
@@ -237,8 +241,8 @@ Supabase-schema change.** No contract bump.
    **do not touch `graph.ts` `serializeJsonLd`**. Wire the graph to render
    inside the document `<head>`.
 5. **Document component + entry-server.tsx**: introduce a `Document` root
-   that returns the full `<html>`; render it with `react-dom/static`
-   `prerenderToNodeStream`. Remove `HelmetProvider` and the
+   that returns the full `<html>`; render it with `react-dom/server`
+   `renderToString`. Remove `HelmetProvider` and the
    `helmetContext` populate-check. Emit the hydration seed as a native
    escaped inline `<script>`.
 6. **prerender.ts**: remove the regex template surgery; write the full
