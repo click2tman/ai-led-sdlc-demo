@@ -29,8 +29,10 @@ create table public.tour_bookings (
   tour_date date not null,
   party_size int not null check (party_size between 1 and 20),
   -- Bounded to 500 chars (ADR 0005); matches the client cap in
-  -- ScheduleTourModal. Delivered incrementally by migrations/0002.
-  notes text check (notes is null or char_length(notes) <= 500),
+  -- ScheduleTourModal. Named to match migrations/0002 so a fresh apply and
+  -- an incremental migrate converge on the same constraint.
+  notes text constraint tour_bookings_notes_length
+    check (notes is null or char_length(notes) <= 500),
   status booking_status not null default 'pending',
   created_at timestamptz not null default now()
 );

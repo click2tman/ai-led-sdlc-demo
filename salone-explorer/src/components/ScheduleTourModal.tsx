@@ -59,6 +59,9 @@ export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
     setNotes('');
     setPending(null);
     setErrorKey(null);
+    // Reset submitting too: closing via Escape mid-request must not leave the
+    // confirm controls disabled on the next open.
+    setSubmitting(false);
     dialogRef.current?.showModal();
   }
 
