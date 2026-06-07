@@ -11,6 +11,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import { routes } from './routes';
 import { AuthProvider } from './lib/auth/AuthProvider';
+import { ToastProvider } from './lib/toast/ToastProvider';
 import type { HydrationData } from './entry-server';
 
 declare global {
@@ -32,7 +33,9 @@ createRoot(rootElement).render(
   <StrictMode>
     <HelmetProvider>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <ToastProvider>
+          <RouterProvider router={router} />
+        </ToastProvider>
       </AuthProvider>
     </HelmetProvider>
   </StrictMode>,

@@ -28,7 +28,9 @@ create table public.tour_bookings (
   attraction_id text not null,
   tour_date date not null,
   party_size int not null check (party_size between 1 and 20),
-  notes text,
+  -- Bounded to 500 chars (ADR 0005); matches the client cap in
+  -- ScheduleTourModal. Delivered incrementally by migrations/0002.
+  notes text check (notes is null or char_length(notes) <= 500),
   status booking_status not null default 'pending',
   created_at timestamptz not null default now()
 );
