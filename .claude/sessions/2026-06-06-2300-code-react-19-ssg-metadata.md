@@ -4,7 +4,7 @@ layer: code
 issue: #25
 context_pack: none
 started: 2026-06-06 23:00 EDT
-ended: in-progress
+ended: 2026-06-07 00:30 EDT
 author: Tamba S Lamin
 actor: claude-autonomous
 branch: issue-25-react-19
@@ -66,4 +66,16 @@ prerendered <head> must reach parity with the captured React-18 baseline
 
 ## Outcomes
 
+## Outcomes
+React 19 migrated per ADR 0006: helmet dropped, full-document SSG render,
+native metadata hoisted to <head>, JSON-LD in <head> via route handle
+(SpeakableSpecification + AggregateRating preserved). PR #58 -> dev, all CI
+green (incl. semgrep after a justified nosemgrep on the JSON-LD
+dangerouslySetInnerHTML). Closes #23/#25/#28. Stacked on #56/#57.
+
 ## Next session
+Merge order to dev: #56 (eslint flat) -> #57 (vite 8) -> #58 (react 19),
+then a dev->main promotion carries the whole dependency-modernisation set
+(RR7 already in dev via #55). Group C remaining: eslint 9->10 (#32, trivial
+now). Docs follow-up: SPEC §13.1/§3 drop react-helmet-async. @types/node 25
+(#24) still held (Node 20).
