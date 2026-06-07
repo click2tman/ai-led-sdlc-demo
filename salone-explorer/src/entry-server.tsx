@@ -5,11 +5,13 @@
 // Helmet head. No browser required - this runs on the Vercel build image.
 import { StrictMode } from 'react';
 import { renderToString } from 'react-dom/server';
+// React Router v7 consolidated the SSR APIs into `react-router`
+// (`react-router-dom/server` was removed).
 import {
   createStaticHandler,
   createStaticRouter,
   StaticRouterProvider,
-} from 'react-router-dom/server';
+} from 'react-router';
 import { HelmetProvider, type HelmetServerState } from 'react-helmet-async';
 import { routes } from './routes';
 import { AuthProvider } from './lib/auth/AuthProvider';
