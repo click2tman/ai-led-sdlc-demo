@@ -5,8 +5,9 @@
 // saved/booking rows are joined to attraction names via the attractions repo.
 // noindex - private page. All copy via the content layer.
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { attractions } from '@/lib/content';
+import { useToast } from '@/lib/toast/ToastProvider';
 import {
   savedAttractions,
   tourBookings,
@@ -40,6 +41,8 @@ function formatDate(iso: string): string {
 export function AccountPage() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { show } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [actionError, setActionError] = useState(false);
@@ -47,6 +50,19 @@ export function AccountPage() {
   const [bookmarks, setBookmarks] = useState<SavedAttraction[]>([]);
   const [favorites, setFavorites] = useState<SavedAttraction[]>([]);
   const [tours, setTours] = useState<TourBooking[]>([]);
+
+  // Surface the Stripe Checkout return (ADR 0008): the ?tour= param is cosmetic
+  // feedback only - the authoritative paid state comes from the webhook. Strip
+  // the params after toasting so a refresh does not repeat it.
+  useEffect(() => {
+    const tour = searchParams.get('tour');
+    if (!tour) return;
+    if (tour === 'paid') show(t('payment.success'));
+    else if (tour === 'cancelled') show(t('payment.cancelled'));
+    searchParams.delete('tour');
+    searchParams.delete('session_id');
+    setSearchParams(searchParams, { replace: true });
+  }, [searchParams, setSearchParams, show]);
 
   const load = useCallback(async () => {
     setLoading(true);

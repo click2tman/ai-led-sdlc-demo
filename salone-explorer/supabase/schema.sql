@@ -71,6 +71,9 @@ create table public.payments (
   created_at timestamptz not null default now()
 );
 create index on public.payments (user_id);
+create unique index payments_one_active_per_booking
+  on public.payments (booking_id)
+  where status in ('requires_payment', 'paid');
 alter table public.payments enable row level security;
 create policy "own payments read" on public.payments for select using (auth.uid() = user_id);
 

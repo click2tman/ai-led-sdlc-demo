@@ -20,6 +20,12 @@ create table public.payments (
   created_at timestamptz not null default now()
 );
 create index on public.payments (user_id);
+-- At most one active (unpaid or paid) payment per booking: a second checkout
+-- for the same booking is rejected at the DB layer. Failed/refunded rows do not
+-- block a retry.
+create unique index payments_one_active_per_booking
+  on public.payments (booking_id)
+  where status in ('requires_payment', 'paid');
 alter table public.payments enable row level security;
 -- Users read their own payments. Status is written ONLY by the Edge Function
 -- (service role bypasses RLS) from a verified Stripe webhook; there is

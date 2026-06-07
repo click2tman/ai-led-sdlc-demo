@@ -136,7 +136,15 @@ export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
     if (!createdBookingId) return;
     setPaying(true);
     try {
-      await getStripe(); // loads Stripe.js with the publishable key (SPEC §3)
+      // Load Stripe.js with the publishable key (SPEC §3). loadStripe resolves
+      // null if Stripe.js is blocked (e.g. an ad-blocker); surface that rather
+      // than redirecting into a broken flow.
+      const stripe = await getStripe();
+      if (!stripe) {
+        setErrorKey('payment.error');
+        setPaying(false);
+        return;
+      }
       const { url } = await payments.startCheckout(createdBookingId);
       window.location.href = url;
     } catch {
@@ -213,7 +221,7 @@ export function ScheduleTourModal({ attractionId }: { attractionId: string }) {
           // --- Optional deposit step (ADR 0008; only when payments enabled) ---
           <div className="flex flex-col gap-4">
             <h2 id="schedule-title" className="text-xl font-bold">
-              {t('schedule.confirm.title')}
+              {t('payment.title')}
             </h2>
             <p className="text-sm text-text-muted">{t('payment.notice')}</p>
 

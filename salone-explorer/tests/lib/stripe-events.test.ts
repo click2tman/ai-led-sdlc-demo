@@ -66,6 +66,16 @@ describe('classifyStripeEvent', () => {
     ).toEqual({ kind: 'failed', paymentIntentId: 'pi_7' });
   });
 
+  it('ignores an expired session with no payment_intent', () => {
+    expect(classifyStripeEvent(event('checkout.session.expired', {}))).toEqual({ kind: 'ignore' });
+  });
+
+  it('ignores a failed payment_intent event missing its id', () => {
+    expect(classifyStripeEvent(event('payment_intent.payment_failed', {}))).toEqual({
+      kind: 'ignore',
+    });
+  });
+
   it('ignores unrelated events', () => {
     expect(classifyStripeEvent(event('customer.created', { id: 'cus_1' }))).toEqual({
       kind: 'ignore',

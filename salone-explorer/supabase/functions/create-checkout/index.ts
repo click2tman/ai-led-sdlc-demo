@@ -11,7 +11,11 @@
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import { corsHeaders } from '../_shared/cors.ts';
-import { DEPOSIT_AMOUNT_CENTS, DEPOSIT_CURRENCY } from '../_shared/payments-config.ts';
+import {
+  DEPOSIT_AMOUNT_CENTS,
+  DEPOSIT_CURRENCY,
+  DEPOSIT_PRODUCT_NAME,
+} from '../_shared/payments-config.ts';
 
 function env(name: string): string {
   const value = Deno.env.get(name);
@@ -62,27 +66,25 @@ Deno.serve(async (req: Request): Promise<Response> => {
       .eq('id', bookingId)
       .maybeSingle();
     if (!booking) return json({ error: 'booking not found' }, 404);
-    if (booking.status === 'cancelled') {
-      return json({ error: 'booking is cancelled' }, 409);
-    }
+    if (booking.status === 'cancelled') return json({ error: 'booking is cancelled' }, 409);
+    if (booking.status === 'confirmed') return json({ error: 'booking already paid' }, 409);
 
-    // 4. Server-side: create the payments claim with the computed amount.
+    // 4. Reject a second checkout for a booking that already has an active or
+    // paid payment (defence in depth above the partial unique index in 0004).
     const admin = createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), {
       auth: { persistSession: false },
     });
-    const { data: payment, error: insertError } = await admin
+    const { data: existing } = await admin
       .from('payments')
-      .insert({
-        user_id: user.id,
-        booking_id: bookingId,
-        amount_cents: DEPOSIT_AMOUNT_CENTS,
-        currency: DEPOSIT_CURRENCY,
-      })
       .select('id')
-      .single();
-    if (insertError || !payment) throw insertError ?? new Error('payments insert failed');
+      .eq('booking_id', bookingId)
+      .in('status', ['requires_payment', 'paid'])
+      .maybeSingle();
+    if (existing) return json({ error: 'payment already in progress' }, 409);
 
-    // 5. Create the Stripe Checkout Session (server holds STRIPE_SECRET_KEY).
+    // 5. Create the Stripe Checkout Session FIRST (server holds STRIPE_SECRET_KEY),
+    // so the payments row can be inserted in ONE statement already carrying the
+    // payment_intent id - no NULL window for a fast webhook to miss.
     const stripe = new Stripe(env('STRIPE_SECRET_KEY'), { apiVersion: '2024-12-18.acacia' });
     const siteUrl = env('SITE_URL');
     const session = await stripe.checkout.sessions.create({
@@ -93,27 +95,32 @@ Deno.serve(async (req: Request): Promise<Response> => {
           price_data: {
             currency: DEPOSIT_CURRENCY,
             unit_amount: DEPOSIT_AMOUNT_CENTS,
-            product_data: { name: 'Salone Explorer tour deposit' },
+            product_data: { name: DEPOSIT_PRODUCT_NAME },
           },
         },
       ],
-      metadata: { booking_id: bookingId, user_id: user.id, payment_id: payment.id },
-      payment_intent_data: { metadata: { booking_id: bookingId, payment_id: payment.id } },
+      metadata: { booking_id: bookingId, user_id: user.id },
+      payment_intent_data: { metadata: { booking_id: bookingId } },
       success_url: `${siteUrl}/account?tour=paid&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/account?tour=cancelled`,
     });
-
-    // 6. Persist the payment_intent id for webhook idempotency keying.
     const paymentIntentId =
       typeof session.payment_intent === 'string' ? session.payment_intent : null;
-    if (paymentIntentId) {
-      await admin
-        .from('payments')
-        .update({ stripe_payment_intent_id: paymentIntentId })
-        .eq('id', payment.id);
+    if (!session.url || !paymentIntentId) {
+      throw new Error('Stripe session missing url or payment_intent');
     }
 
-    if (!session.url) throw new Error('Stripe session missing url');
+    // 6. Atomic insert with the intent id already set (the unique constraint on
+    // stripe_payment_intent_id + the 0004 partial index resolve any race).
+    const { error: insertError } = await admin.from('payments').insert({
+      user_id: user.id,
+      booking_id: bookingId,
+      amount_cents: DEPOSIT_AMOUNT_CENTS,
+      currency: DEPOSIT_CURRENCY,
+      stripe_payment_intent_id: paymentIntentId,
+    });
+    if (insertError) throw insertError;
+
     return json({ url: session.url }, 200);
   } catch (error) {
     console.error('create-checkout: unhandled error', error);
