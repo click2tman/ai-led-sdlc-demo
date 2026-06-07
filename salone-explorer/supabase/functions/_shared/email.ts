@@ -27,16 +27,27 @@ export interface EmailProvider {
 export function resendProvider(apiKey: string, from: string): EmailProvider {
   return {
     async send({ to, subject, text }: EmailMessage): Promise<SendResult> {
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ from, to, subject, text }),
-      });
+      // Bound the outbound call so a hung upstream cannot exhaust the function
+      // wall-clock budget.
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10_000);
+      let response: Response;
+      try {
+        response = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ from, to, subject, text }),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
       if (!response.ok) {
-        const detail = await response.text();
+        // Truncate the provider body: some APIs reflect request metadata.
+        const detail = (await response.text()).slice(0, 200);
         throw new Error(`Resend send failed (${response.status}): ${detail}`);
       }
       const data = (await response.json()) as { id?: string };

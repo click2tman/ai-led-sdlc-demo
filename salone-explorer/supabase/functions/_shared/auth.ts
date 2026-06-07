@@ -4,10 +4,7 @@
 // shape before any service-role work. Pure (no Deno globals) - unit-tested.
 import type { WebhookPayload, BookingRow } from './types.ts';
 
-/**
- * Length-aware constant-time string compare. Avoids early-exit timing leaks
- * on the secret body (length is not itself secret for a fixed-length token).
- */
+/** Constant-time compare of two EQUAL-length strings (XOR accumulation). */
 export function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let mismatch = 0;
@@ -17,10 +14,25 @@ export function timingSafeEqual(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
-/** True when `provided` matches the configured secret (both non-empty). */
-export function verifyWebhookSecret(provided: string | null, expected: string | undefined): boolean {
+/** SHA-256 hex of a string (Web Crypto; available in Deno and Node 20+). */
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/**
+ * True when `provided` matches the configured secret (both non-empty). Compares
+ * fixed-length SHA-256 hex digests so neither the length nor the bytes of the
+ * secret leak through comparison timing.
+ */
+export async function verifyWebhookSecret(
+  provided: string | null,
+  expected: string | undefined,
+): Promise<boolean> {
   if (!provided || !expected) return false;
-  return timingSafeEqual(provided, expected);
+  return timingSafeEqual(await sha256Hex(provided), await sha256Hex(expected));
 }
 
 function isBookingRow(value: unknown): value is BookingRow {
@@ -43,7 +55,9 @@ export function isValidPayload(body: unknown): body is WebhookPayload {
   if (payload.type !== 'INSERT' && payload.type !== 'UPDATE' && payload.type !== 'DELETE') {
     return false;
   }
-  if (typeof payload.table !== 'string') return false;
+  // Defence-in-depth: only tour_bookings drives this function, even if the
+  // WEBHOOK_SECRET is ever shared with another table's webhook.
+  if (payload.table !== 'tour_bookings') return false;
   if (payload.record !== null && !isBookingRow(payload.record)) return false;
   if (payload.old_record !== null && !isBookingRow(payload.old_record)) return false;
   return true;

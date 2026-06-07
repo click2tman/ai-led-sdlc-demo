@@ -5,6 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { classifyEvent } from '../../supabase/functions/_shared/classify';
 import { composeEmail } from '../../supabase/functions/_shared/compose';
+import { t } from '../../supabase/functions/_shared/copy';
 import {
   verifyWebhookSecret,
   timingSafeEqual,
@@ -123,11 +124,13 @@ describe('webhook auth guards', () => {
     expect(timingSafeEqual('secret', 'secre')).toBe(false);
   });
 
-  it('verifyWebhookSecret requires both sides non-empty and equal', () => {
-    expect(verifyWebhookSecret('abc', 'abc')).toBe(true);
-    expect(verifyWebhookSecret('abc', 'xyz')).toBe(false);
-    expect(verifyWebhookSecret(null, 'abc')).toBe(false);
-    expect(verifyWebhookSecret('abc', undefined)).toBe(false);
+  it('verifyWebhookSecret requires both sides non-empty and equal', async () => {
+    expect(await verifyWebhookSecret('abc', 'abc')).toBe(true);
+    expect(await verifyWebhookSecret('abc', 'xyz')).toBe(false);
+    // Different lengths must not match (and must not leak via early exit).
+    expect(await verifyWebhookSecret('abc', 'abcd')).toBe(false);
+    expect(await verifyWebhookSecret(null, 'abc')).toBe(false);
+    expect(await verifyWebhookSecret('abc', undefined)).toBe(false);
   });
 
   it('isValidPayload accepts a well-formed payload and rejects junk', () => {
@@ -140,5 +143,17 @@ describe('webhook auth guards', () => {
     expect(
       isValidPayload({ type: 'INSERT', table: 'tour_bookings', record: { id: 'b1' }, old_record: null }),
     ).toBe(false);
+  });
+
+  it('isValidPayload rejects a well-formed payload for another table', () => {
+    expect(isValidPayload(payload({ table: 'profiles' }))).toBe(false);
+  });
+});
+
+describe('email copy', () => {
+  it('t() resolves a known key and throws on a missing one', () => {
+    expect(t('email.created.subject')).toBe('Your Salone Explorer tour request');
+    // @ts-expect-error - unknown key is a type error and a runtime throw.
+    expect(() => t('email.nope')).toThrow(/missing key/);
   });
 });

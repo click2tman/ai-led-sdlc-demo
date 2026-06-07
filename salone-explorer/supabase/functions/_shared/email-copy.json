@@ -6,6 +6,7 @@
   "email.created.intro": "Thanks for planning a visit. We have recorded your tour request and will follow up to confirm availability.",
   "email.created.subject": "Your Salone Explorer tour request",
   "email.details.attraction": "Attraction",
+  "email.details.attraction.unknown": "your selected attraction",
   "email.details.date": "Date",
   "email.details.heading": "Booking details",
   "email.details.party": "Party size",

@@ -156,6 +156,7 @@
   "email.cancelled.intro": "Your tour request has been cancelled. You can schedule a new visit any time from your account.",
   "email.details.heading": "Booking details",
   "email.details.attraction": "Attraction",
+  "email.details.attraction.unknown": "your selected attraction",
   "email.details.date": "Date",
   "email.details.party": "Party size",
   "email.signature": "Salone Explorer - a FambulTik guide by TpGroup (SL) Limited",

@@ -157,13 +157,18 @@ public.email_log (
   id uuid pk default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   booking_id uuid not null references public.tour_bookings(id) on delete cascade,
-  event_type text not null check (event_type in ('booking_created','booking_cancelled')),
+  event_type text not null check (event_type in ('created','cancelled')),
   provider_message_id text,
-  status text not null default 'sent' check (status in ('sent','failed')),
   created_at timestamptz not null default now(),
   unique (booking_id, event_type)
 )
 ```
+
+The row is an idempotency *claim*: insert-before-send, a surviving row means
+sent. There is no `status` column - on a send failure the function deletes its
+row so a manual re-drive can retry; a successful send records
+`provider_message_id`. `event_type` uses the short `created`/`cancelled` values
+(already scoped to a booking by `booking_id`), matching `BookingEvent`.
 
 - The `unique (booking_id, event_type)` constraint is the idempotency
   key: the function attempts an insert *before* sending; a duplicate
@@ -200,10 +205,16 @@ Positive:
 
 Negative / costs:
 
-- Adds a server tier (Deno Edge Functions) and two new secrets
-  (`EMAIL_PROVIDER_API_KEY`, `WEBHOOK_SECRET`) to operate.
+- Adds a server tier (Deno Edge Functions) and three new function secrets
+  to operate: `EMAIL_PROVIDER_API_KEY`, `WEBHOOK_SECRET`, and `EMAIL_FROM`
+  (the verified sender address). All are Edge Function secrets, never `VITE_`.
 - A new generated artefact (`email-copy.json`) and a CI sync check to
   maintain.
+- The attraction display name is read from the `attractions` table (Phase
+  2.5). If that table is absent/empty the function logs a warning and uses a
+  generic content-layer label, so `attractions.sql` should be applied before
+  deploy for friendly names. Remote Deno deps are pinned via
+  `supabase/functions/deno.json` (no floating major over the service-role key).
 - Database Webhooks are configured in the Supabase dashboard (live-infra),
   so the trigger is not fully expressed in version-controlled SQL; the
   webhook config must be documented in the runbook.
