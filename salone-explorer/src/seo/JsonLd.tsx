@@ -1,16 +1,15 @@
 // Emits a Schema.org JSON-LD <script> into the document head via Helmet.
-// Data is built by src/seo/graph.ts (SPEC §14).
+// Data is built by src/seo/graph.ts (SPEC §14); serializeJsonLd does the
+// "<" escaping that prevents a "</script>" breakout (the single XSS control).
 import { Helmet } from 'react-helmet-async';
+import { serializeJsonLd } from './graph';
 
 type JsonLdProps = {
   data: Record<string, unknown>;
 };
 
 export function JsonLd({ data }: JsonLdProps) {
-  // Escape "<" so a string containing "</script>" (e.g. an FAQ or description)
-  // cannot break out of the script element or survive the prerender
-  // serialization as markup. "<" is valid inside JSON-LD.
-  const json = JSON.stringify(data).replace(/</g, '\\u003c');
+  const json = serializeJsonLd(data);
   return (
     <Helmet>
       <script type="application/ld+json">{json}</script>

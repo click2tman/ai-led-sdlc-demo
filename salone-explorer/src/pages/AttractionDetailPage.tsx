@@ -23,6 +23,7 @@ import { buttonVariants } from '@/components/Button';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { ScheduleTourModal } from '@/components/ScheduleTourModal';
+import { ReviewList } from '@/components/ReviewList';
 
 export async function attractionLoader({
   params,
@@ -205,6 +206,8 @@ export function AttractionDetailPage() {
             )}
           </aside>
         </div>
+
+        <ReviewList attractionId={attraction.id} />
 
         <div className="mt-10">
           <SourcesList sources={attraction.sources} />

@@ -6,15 +6,19 @@
 // attractions barrel.
 import { supabaseSavedRepository } from './saved';
 import { supabaseBookingRepository } from './bookings';
+import { supabaseReviewRepository } from './reviews';
 import type { SavedAttractionRepository } from './saved';
 import type { TourBookingRepository } from './bookings';
+import type { ReviewRepository } from './reviews';
 
 export const savedAttractions: SavedAttractionRepository =
   supabaseSavedRepository;
 export const tourBookings: TourBookingRepository = supabaseBookingRepository;
+export const reviews: ReviewRepository = supabaseReviewRepository;
 
 export type { SavedAttractionRepository } from './saved';
 export type { TourBookingRepository } from './bookings';
+export type { ReviewRepository, ReviewPatch } from './reviews';
 export type {
   Profile,
   SavedAttraction,
@@ -22,4 +26,8 @@ export type {
   TourBooking,
   NewTourBooking,
   BookingStatus,
+  Review,
+  NewReview,
+  ReviewStatus,
+  AttractionRating,
 } from './types';
