@@ -23,6 +23,7 @@ import { buttonVariants } from '@/components/Button';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { ScheduleTourModal } from '@/components/ScheduleTourModal';
+import { ReviewList } from '@/components/ReviewList';
 
 export async function attractionLoader({
   params,
@@ -89,9 +90,19 @@ export function AttractionDetailPage() {
 
         <header className="mb-6">
           <h1 className="text-3xl font-bold md:text-4xl">{attraction.name}</h1>
-          <p className="mt-1 text-text-muted">{attraction.location.region}</p>
+          {/* Region + rating are marked data-speakable="facts" so the
+              SpeakableSpecification (graph.ts) covers location and rating high
+              on the page, not just the hours block in the aside (SPEC §13.3). */}
+          <p className="mt-1 text-text-muted" data-speakable="facts">
+            {attraction.location.region}
+          </p>
           <div className="mt-3 flex flex-wrap items-center gap-4">
-            <RatingBadge rating={attraction.rating} reviewCount={attraction.reviewCount} />
+            <span data-speakable="facts">
+              <RatingBadge
+                rating={attraction.rating}
+                reviewCount={attraction.reviewCount}
+              />
+            </span>
             <ul className="flex flex-wrap gap-1.5">
               {attraction.tags.map((tag) => (
                 <li
@@ -195,6 +206,8 @@ export function AttractionDetailPage() {
             )}
           </aside>
         </div>
+
+        <ReviewList attractionId={attraction.id} />
 
         <div className="mt-10">
           <SourcesList sources={attraction.sources} />
