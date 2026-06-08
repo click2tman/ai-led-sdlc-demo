@@ -1,6 +1,13 @@
 /* schema.sql - Salone Explorer Supabase schema (SPEC §6.3): user-scoped
    profiles, saved_attractions, and tour_bookings with RLS and a new-user
-   trigger. Apply in the Supabase SQL editor (Phase 5). Never disable RLS. */
+   trigger. Apply in the Supabase SQL editor (Phase 5). Never disable RLS.
+
+   SCOPE: this file is the §6.3 base + the payments table (Phase 11). The
+   reviews (0001), email_log (0003), and review_flags + moderator role/policies
+   (0005) objects are migration-only and are NOT mirrored here yet - apply the
+   numbered migrations in supabase/migrations/ for those features. Fully
+   back-filling reviews/email_log/review_flags into this file (so a fresh apply
+   equals the migrated state) is a tracked schema-hygiene follow-up. */
 
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
