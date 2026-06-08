@@ -162,6 +162,13 @@
   "email.signature": "Salone Explorer - a FambulTik guide by TpGroup (SL) Limited",
   "email.disclaimer": "This is a demonstration project for educational purposes and is not an official tour-booking service.",
 
+  "payment.title": "Pay your deposit",
+  "payment.cta": "Pay deposit (test)",
+  "payment.notice": "Test mode only. Use Stripe test card 4242 4242 4242 4242; no real charge is made.",
+  "payment.success": "Deposit paid. Your tour is confirmed.",
+  "payment.cancelled": "Payment cancelled. Your tour request is still saved.",
+  "payment.error": "We could not start checkout. Please try again.",
+
   "about.title": "About Salone Explorer",
   "about.brand.heading": "FambulTik and TpGroup",
   "about.brand": "Salone Explorer is published by TpGroup (SL) Limited under the FambulTik brand. FambulTik - Krio for \"family stick\" - is TpGroup's heritage-and-diaspora brand, helping people reconnect with Sierra Leone through homecoming, genealogy, and cultural education. This guide extends that mission by surfacing the places a traveller might want to see.",

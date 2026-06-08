@@ -77,3 +77,15 @@ export type AttractionRating = {
   mean: number;
   count: number;
 };
+
+/** Phase 11 (§6.3) payment lifecycle. Status is written only by the webhook. */
+export type PaymentStatus = 'requires_payment' | 'paid' | 'refunded' | 'failed';
+
+export type Payment = {
+  id: string;
+  bookingId: string;
+  amountCents: number;
+  currency: string;
+  status: PaymentStatus;
+  createdAt: string;
+};

@@ -55,6 +55,28 @@ create policy "own bookings ins"   on public.tour_bookings for insert with check
 create policy "own bookings upd"   on public.tour_bookings for update using (auth.uid() = user_id);
 create policy "own bookings del"   on public.tour_bookings for delete using (auth.uid() = user_id);
 
+-- Phase 11 (ADR 0008): payments - a deposit against a tour booking. Status is
+-- written ONLY by the stripe-webhook Edge Function (service role) after Stripe
+-- signature verification; no client write policy. Migration 0004_payments.sql.
+create type payment_status as enum
+  ('requires_payment', 'paid', 'refunded', 'failed');
+create table public.payments (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  booking_id uuid not null references public.tour_bookings(id) on delete cascade,
+  stripe_payment_intent_id text unique,
+  amount_cents int not null check (amount_cents >= 0),
+  currency text not null default 'usd',
+  status payment_status not null default 'requires_payment',
+  created_at timestamptz not null default now()
+);
+create index on public.payments (user_id);
+create unique index payments_one_active_per_booking
+  on public.payments (booking_id)
+  where status in ('requires_payment', 'paid');
+alter table public.payments enable row level security;
+create policy "own payments read" on public.payments for select using (auth.uid() = user_id);
+
 create or replace function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
