@@ -41,15 +41,28 @@ language sql stable security definer set search_path = public as $$
   );
 $$;
 
--- Harden the own-update policy: a user may update their profile but NOT change
--- their own role (otherwise a direct PATCH self-grants moderator). §6.3 touch.
+-- Harden against self-escalation: a user may update their own profile but NOT
+-- change their own role. The pin is a trigger (NEW vs OLD is unambiguous),
+-- NOT a self-referential WITH CHECK subquery, which can read the post-update
+-- value within the same statement and be bypassed. §6.3 touch.
 drop policy "own profile update" on public.profiles;
 create policy "own profile update" on public.profiles
-  for update using (auth.uid() = id)
-  with check (
-    auth.uid() = id
-    and role = (select role from public.profiles where id = auth.uid())
-  );
+  for update using (auth.uid() = id) with check (auth.uid() = id);
+
+create or replace function public.guard_profile_role() returns trigger
+language plpgsql set search_path = public as $$
+begin
+  -- Authenticated users (auth.uid() not null) may not change their role; the
+  -- service role / operator SQL (auth.uid() null) assigns moderators.
+  if auth.uid() is not null and new.role is distinct from old.role then
+    raise exception 'role may only be changed by an operator';
+  end if;
+  return new;
+end; $$;
+
+create trigger profiles_guard_role
+  before update on public.profiles
+  for each row execute function public.guard_profile_role();
 
 -- 3. Moderator action on reviews: a second UPDATE policy (coexists with the
 --    author policy; permissive policies OR) + a moderator read for triage.
@@ -61,7 +74,7 @@ create policy "moderator reviews read" on public.reviews
 -- The load-bearing control (issue #50): a non-author (moderator or service
 -- role) may change ONLY status; altering content/ownership raises.
 create or replace function public.guard_review_content() returns trigger
-language plpgsql as $$
+language plpgsql set search_path = public as $$
 begin
   if auth.uid() is distinct from old.user_id then
     if new.body is distinct from old.body
@@ -81,13 +94,16 @@ create trigger reviews_guard_content
 -- 4. Moderator read access: a view + a gated definer RPC. The raw review_flags
 --    table stays own-row only (1); counts reach moderators only through here.
 create or replace view public.moderation_queue as
-  select r.id as review_id, r.attraction_id, r.status, r.created_at,
+  select r.id as review_id, r.attraction_id, r.body, r.status, r.created_at,
          count(f.id) as flag_count,
          array_agg(distinct f.reason) as reasons,
          max(f.created_at) as last_flagged_at
   from public.reviews r
   join public.review_flags f on f.review_id = r.id
-  group by r.id, r.attraction_id, r.status, r.created_at;
+  group by r.id, r.attraction_id, r.body, r.status, r.created_at;
+-- Force all access through list_moderation_queue() (which checks is_moderator);
+-- the view must not be directly queryable via PostgREST.
+revoke all on public.moderation_queue from anon, authenticated;
 
 create or replace function public.list_moderation_queue()
 returns setof public.moderation_queue

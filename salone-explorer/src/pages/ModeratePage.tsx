@@ -39,9 +39,12 @@ export function ModeratePage() {
   const [isModerator, setIsModerator] = useState(false);
   const [items, setItems] = useState<ModerationItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const role = await reviewFlags.getRole();
       if (role !== 'moderator') {
@@ -51,7 +54,8 @@ export function ModeratePage() {
       setIsModerator(true);
       setItems(await reviewFlags.listQueue());
     } catch {
-      setIsModerator(false);
+      // A real failure (not "not a moderator") gets its own message.
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -68,12 +72,16 @@ export function ModeratePage() {
   }, [authLoading, user, load]);
 
   async function setStatus(reviewId: string, status: ReviewStatus) {
+    if (busy) return;
+    setBusy(true);
     try {
       await reviewFlags.setStatus(reviewId, status);
       show(t('moderation.success'));
       await load();
     } catch {
       show(t('moderation.error'));
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -82,6 +90,22 @@ export function ModeratePage() {
       <p role="status" className="mx-auto max-w-4xl px-4 py-16 text-text-muted">
         {t('common.loading')}
       </p>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="mx-auto max-w-3xl px-4 py-16 text-center">
+        <SeoHead
+          title={`${t('moderation.title')} - ${t('app.name')}`}
+          description={t('moderation.intro')}
+          path="/moderate"
+          noindex
+        />
+        <p role="alert" className="text-danger">
+          {t('moderation.error')}
+        </p>
+      </section>
     );
   }
 
@@ -123,6 +147,7 @@ export function ModeratePage() {
                   {item.flagCount} {t('moderation.col.reports')} · {reasonLabels(item.reasons)}
                 </span>
               </div>
+              <p className="mt-2 whitespace-pre-line text-sm text-text">{item.body}</p>
               <p className="mt-1 text-xs text-text-muted">
                 {t('moderation.col.status')}: {t(STATUS_KEY[item.status])}
               </p>
@@ -132,7 +157,7 @@ export function ModeratePage() {
                     key={action.key}
                     type="button"
                     variant={item.status === action.status ? 'primary' : 'outline'}
-                    disabled={item.status === action.status}
+                    disabled={busy || item.status === action.status}
                     onClick={() => setStatus(item.reviewId, action.status)}
                   >
                     {t(`moderation.action.${action.key}`)}

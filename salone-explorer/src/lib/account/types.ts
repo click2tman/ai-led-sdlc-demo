@@ -103,6 +103,7 @@ export type NewFlag = {
 export type ModerationItem = {
   reviewId: string;
   attractionId: string;
+  body: string;
   status: ReviewStatus;
   flagCount: number;
   reasons: FlagReason[];

@@ -26,6 +26,22 @@ function FlagButton({ reviewId }: { reviewId: string }) {
   const [flagged, setFlagged] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Reflect a prior-session flag so returning users see "Reported", not the
+  // CTA. A failed pre-check is non-critical: it just leaves the CTA shown (the
+  // flag action itself is idempotent and surfaces its own errors).
+  useEffect(() => {
+    let active = true;
+    reviewFlags
+      .hasFlagged(reviewId)
+      .then((already) => {
+        if (active && already) setFlagged(true);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [reviewId]);
+
   if (flagged) {
     return <span className="text-xs text-text-muted">{t('reviews.flag.already')}</span>;
   }
@@ -49,6 +65,7 @@ function FlagButton({ reviewId }: { reviewId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
+        aria-expanded={open}
         className="text-xs text-text-muted underline hover:no-underline"
       >
         {t('reviews.flag.cta')}
@@ -65,6 +82,7 @@ function FlagButton({ reviewId }: { reviewId: string }) {
             <input
               type="radio"
               name={`flag-${reviewId}`}
+              value={value}
               checked={reason === value}
               onChange={() => setReason(value)}
             />

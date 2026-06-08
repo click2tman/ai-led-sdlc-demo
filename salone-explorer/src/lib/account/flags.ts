@@ -10,19 +10,21 @@ import { getSupabase } from '@/lib/supabase';
 import type { FlagReason, ModerationItem, NewFlag, ReviewStatus, UserRole } from './types';
 
 /** Raw row from the list_moderation_queue() RPC (snake_case). */
-type QueueRow = {
+export type QueueRow = {
   review_id: string;
   attraction_id: string;
+  body: string;
   status: ReviewStatus;
   flag_count: number;
   reasons: FlagReason[] | null;
   last_flagged_at: string;
 };
 
-function toItem(row: QueueRow): ModerationItem {
+export function toItem(row: QueueRow): ModerationItem {
   return {
     reviewId: row.review_id,
     attractionId: row.attraction_id,
+    body: row.body,
     status: row.status,
     flagCount: Number(row.flag_count),
     reasons: row.reasons ?? [],
@@ -95,7 +97,9 @@ export const supabaseFlagRepository: FlagRepository = {
   async getRole() {
     const {
       data: { user },
+      error: userError,
     } = await getSupabase().auth.getUser();
+    if (userError) throw userError;
     if (!user) return 'user';
     const { data, error } = await getSupabase()
       .from('profiles')
