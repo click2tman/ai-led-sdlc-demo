@@ -7,12 +7,87 @@
 // prerendered JSON-LD instead). Reviews are pseudonymous (no author PII).
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Star } from 'lucide-react';
-import { reviews, type Review } from '@/lib/account';
+import { reviews, reviewFlags, type Review, type FlagReason } from '@/lib/account';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useToast } from '@/lib/toast/ToastProvider';
 import { t, type StringKey } from '@/lib/content';
 import { ReviewForm, type ReviewSavedAction } from './ReviewForm';
+import { Button } from './Button';
+
+const FLAG_REASONS: FlagReason[] = ['spam', 'offensive', 'inaccurate', 'other'];
+
+/** Report affordance for another user's review (issue #50). A signed-in,
+ * non-author reader picks a reason; flagging is idempotent (one per user). */
+function FlagButton({ reviewId }: { reviewId: string }) {
+  const { show } = useToast();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState<FlagReason>('spam');
+  const [flagged, setFlagged] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  if (flagged) {
+    return <span className="text-xs text-text-muted">{t('reviews.flag.already')}</span>;
+  }
+
+  async function submit() {
+    setSubmitting(true);
+    try {
+      await reviewFlags.flag({ reviewId, reason });
+      setFlagged(true);
+      setOpen(false);
+      show(t('reviews.flag.success'));
+    } catch {
+      show(t('reviews.flag.error'));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="text-xs text-text-muted underline hover:no-underline"
+      >
+        {t('reviews.flag.cta')}
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-2 flex flex-col gap-2 rounded border border-border p-2">
+      <fieldset className="flex flex-col gap-1">
+        <legend className="text-xs font-medium">{t('reviews.flag.reasonLabel')}</legend>
+        {FLAG_REASONS.map((value) => (
+          <label key={value} className="flex items-center gap-1.5 text-xs">
+            <input
+              type="radio"
+              name={`flag-${reviewId}`}
+              checked={reason === value}
+              onChange={() => setReason(value)}
+            />
+            {t(`reviews.flag.reason.${value}` as StringKey)}
+          </label>
+        ))}
+      </fieldset>
+      <div className="flex gap-2">
+        <Button type="button" onClick={submit} disabled={submitting} aria-busy={submitting}>
+          {t('reviews.flag.submit')}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setOpen(false)}
+          disabled={submitting}
+        >
+          {t('reviews.flag.cancel')}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 /** Success microcopy for each completed write (announced via role=status). */
 const SUCCESS_KEY: Record<ReviewSavedAction, StringKey> = {
@@ -143,6 +218,11 @@ export function ReviewList({ attractionId }: { attractionId: string }) {
               <p className="mt-2 whitespace-pre-line text-sm text-text">
                 {review.body}
               </p>
+              {user && !(own && review.id === own.id) && (
+                <div className="mt-2">
+                  <FlagButton reviewId={review.id} />
+                </div>
+              )}
             </li>
           ))}
         </ul>

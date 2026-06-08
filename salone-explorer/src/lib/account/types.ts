@@ -89,3 +89,22 @@ export type Payment = {
   status: PaymentStatus;
   createdAt: string;
 };
+
+/** Phase 9 follow-up (#50, ADR 0009): review flagging + moderator role. */
+export type FlagReason = 'spam' | 'offensive' | 'inaccurate' | 'other';
+export type UserRole = 'user' | 'moderator';
+
+export type NewFlag = {
+  reviewId: string;
+  reason: FlagReason;
+};
+
+/** A row in the moderator queue (from list_moderation_queue()). */
+export type ModerationItem = {
+  reviewId: string;
+  attractionId: string;
+  status: ReviewStatus;
+  flagCount: number;
+  reasons: FlagReason[];
+  lastFlaggedAt: string;
+};

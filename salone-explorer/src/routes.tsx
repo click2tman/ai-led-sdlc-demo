@@ -13,6 +13,7 @@ import { AboutPage, aboutLoader } from '@/pages/AboutPage';
 import { SignInPage } from '@/pages/SignInPage';
 import { SignUpPage } from '@/pages/SignUpPage';
 import { AccountPage } from '@/pages/AccountPage';
+import { ModeratePage } from '@/pages/ModeratePage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import type { Attraction } from '@/data/types';
@@ -69,6 +70,16 @@ export const routes: RouteObject[] = [
         element: (
           <ProtectedRoute>
             <AccountPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        // Client-only, role-gated moderator surface (issue #50). Excluded from
+        // the prerender list; the page itself gates on getRole()==='moderator'.
+        path: 'moderate',
+        element: (
+          <ProtectedRoute>
+            <ModeratePage />
           </ProtectedRoute>
         ),
       },
