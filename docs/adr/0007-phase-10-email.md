@@ -131,11 +131,12 @@ PII carried in the message (§44 — no PII beyond what the message needs):
 
 Define a minimal `EmailProvider` interface in
 `supabase/functions/_shared/email.ts`:
-`sendEmail({ to, subject, html, text, idempotencyKey })`. Provide a single
-`resendProvider` implementation reading `EMAIL_PROVIDER_API_KEY`. The
-interface keeps the provider swappable (SES, Postmark) without touching
-trigger or copy logic. Sender domain and DNS (SPF/DKIM/DMARC) are
-live-infra (see §Live-infra).
+`send({ to, subject, text }): Promise<{ id }>` (plain-text transactional email;
+idempotency is enforced upstream by the email_log unique constraint, not a
+provider key). Provide a single `resendProvider` implementation reading
+`EMAIL_PROVIDER_API_KEY`. The interface keeps the provider swappable (SES,
+Postmark) without touching trigger or copy logic. Sender domain and DNS
+(SPF/DKIM/DMARC) are live-infra (see §Live-infra).
 
 ### D5 — Inbound auth: the function is not an open relay
 

@@ -12,7 +12,7 @@
 // This file is Deno glue (Deno.serve, Deno.env, import map); the testable logic
 // lives in ../_shared/*.ts and is covered by the app's vitest. It is excluded
 // from the app's tsc/eslint (eslint.config.js ignores supabase/).
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { verifyWebhookSecret, isValidPayload } from '../_shared/auth.ts';
 import { classifyEvent } from '../_shared/classify.ts';
 import { composeEmail } from '../_shared/compose.ts';
@@ -122,15 +122,23 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 });
 
-/** Delete the idempotency-claim row so a future delivery can retry. */
+/** Delete the idempotency-claim row so a future delivery can retry. A failed
+ * delete leaves the claim in place and would block a re-drive as "already
+ * sent", so surface it for operator attention. */
 async function releaseClaim(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   bookingId: string,
   event: string,
 ): Promise<void> {
-  await supabase
+  const { error } = await supabase
     .from('email_log')
     .delete()
     .eq('booking_id', bookingId)
     .eq('event_type', event);
+  if (error) {
+    console.error(
+      `booking-email: failed to release email_log claim for ${bookingId}/${event}; a re-drive may be blocked`,
+      error,
+    );
+  }
 }
