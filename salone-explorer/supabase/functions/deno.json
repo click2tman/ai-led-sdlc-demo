@@ -1,0 +1,6 @@
+{
+  "//": "Deno import map for the Edge Functions (ADR 0007). Remote deps are pinned to an exact version to remove the floating-major supply-chain risk; the function holds the service-role key.",
+  "imports": {
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.47.10"
+  }
+}

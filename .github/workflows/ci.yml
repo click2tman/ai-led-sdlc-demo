@@ -29,4 +29,18 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test
+      # Fail if the Edge Function email-copy snapshot drifts from the content
+      # layer (ADR 0007 D2): regenerate and assert no diff.
+      - run: npm run check:email-copy
       - run: npm run build
+
+  # Type-check the Deno Edge Functions (excluded from the app's tsc/eslint), so
+  # a syntax/type error surfaces here, not at deploy time.
+  deno-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check --config supabase/functions/deno.json supabase/functions/*/index.ts
