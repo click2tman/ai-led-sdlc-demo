@@ -37,12 +37,18 @@ their LABELS are content keys `reviews.flag.reason.*`.
 (role in ('user','moderator'))`. Helper `public.is_moderator()` (SQL, stable,
 security definer) = exists a profiles row for auth.uid() with role='moderator'.
 CRITICAL (§6.3 touch, ratified): the existing `"own profile update"` policy lets
-a user PATCH their own row, so it MUST be replaced to pin role - a user may
-update their profile but NOT change their own role:
-`with check (auth.uid()=id and role = (select role from public.profiles where
-id=auth.uid()))`. Assignment is operator SQL (`update profiles set
-role='moderator' where id=...`), never self-serve. The client reads its own
-profiles.role only to show/hide the moderation UI; the server never trusts it.
+a user PATCH their own row, so it MUST be hardened to pin role - a user may
+update their profile but NOT change their own role. The pin is a
+`guard_profile_role()` BEFORE UPDATE trigger comparing `new.role` to `old.role`
+(raising when an authenticated user changes it), with the policy simplified to
+`with check (auth.uid()=id)`. A self-referential `WITH CHECK` subquery
+(`role = (select role ... where id=auth.uid())`) was REJECTED in review: within
+the same statement it can read the post-update value and be bypassed; OLD/NEW in
+a trigger are unambiguous (same pattern as `guard_review_content`). Assignment is
+operator SQL (`update profiles set role='moderator' where id=...`; auth.uid() is
+null for the service role, which the trigger permits), never self-serve. The
+client reads its own profiles.role only to show/hide the moderation UI; the
+server never trusts it.
 
 ### D3 - Moderator action: a second RLS UPDATE policy on reviews + a content-guard trigger
 `create policy "moderator review status update" on public.reviews for update
