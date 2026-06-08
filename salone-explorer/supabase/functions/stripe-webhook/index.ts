@@ -56,31 +56,38 @@ Deno.serve(async (req: Request): Promise<Response> => {
     if (outcome.kind === 'paid') {
       // Conditional UPDATE: only flips a not-yet-paid row. A duplicate or
       // out-of-order delivery that finds it already paid updates zero rows.
-      const { data: paidRows } = await admin
+      const { error: payError } = await admin
         .from('payments')
         .update({ status: 'paid' })
         .eq('stripe_payment_intent_id', outcome.paymentIntentId)
-        .neq('status', 'paid')
-        .select('id');
-      if (paidRows && paidRows.length > 0) {
-        // Guarded: cannot clobber a later 'cancelled'.
-        await admin
-          .from('tour_bookings')
-          .update({ status: 'confirmed' })
-          .eq('id', outcome.bookingId)
-          .eq('status', 'pending');
-      }
+        .neq('status', 'paid');
+      if (payError) throw payError;
+
+      // Confirm the booking on EVERY paid delivery (not gated on the payments
+      // update above), so a retry recovers if a prior delivery flipped payments
+      // but failed here. Guarded by status='pending' - idempotent and cannot
+      // clobber a later 'cancelled'.
+      const { error: bookingError } = await admin
+        .from('tour_bookings')
+        .update({ status: 'confirmed' })
+        .eq('id', outcome.bookingId)
+        .eq('status', 'pending');
+      if (bookingError) throw bookingError;
+
       return new Response('ok', { status: 200 });
     }
 
     // outcome.kind === 'failed'
-    await admin
+    const { error: failError } = await admin
       .from('payments')
       .update({ status: 'failed' })
       .eq('stripe_payment_intent_id', outcome.paymentIntentId)
       .not('status', 'in', '("paid","refunded")');
+    if (failError) throw failError;
     return new Response('ok', { status: 200 });
   } catch (error) {
+    // A DB write failure throws here -> 500 -> Stripe retries the delivery; the
+    // conditional updates above make every retry idempotent.
     console.error('stripe-webhook: handler error', error);
     return new Response('internal error', { status: 500 });
   }

@@ -59,9 +59,11 @@ export function AccountPage() {
     if (!tour) return;
     if (tour === 'paid') show(t('payment.success'));
     else if (tour === 'cancelled') show(t('payment.cancelled'));
-    searchParams.delete('tour');
-    searchParams.delete('session_id');
-    setSearchParams(searchParams, { replace: true });
+    // Strip the params on a fresh instance (don't mutate the one React owns).
+    const next = new URLSearchParams(searchParams);
+    next.delete('tour');
+    next.delete('session_id');
+    setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams, show]);
 
   const load = useCallback(async () => {
