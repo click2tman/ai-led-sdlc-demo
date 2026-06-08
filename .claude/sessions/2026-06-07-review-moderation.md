@@ -58,5 +58,15 @@ integration test is issue #39.
 ## Open questions
 
 ## Outcomes
+Review flagging + moderator role shipped per ADR 0009: review_flags (RLS own-row),
+profiles.role + trigger-pinned no-self-escalation, moderator reviews UPDATE policy
++ content-guard trigger, gated moderation_queue RPC, ReviewList flag affordance,
+role-gated /moderate page. security + code review findings all addressed (1 HIGH
+self-escalation fixed via a trigger + mediums/code). PR -> dev. Closes #50.
+Live-infra: apply 0005; assign a moderator via operator SQL.
 
 ## Next session
+Remaining reviews follow-ups: #51 named reviews, #52 redeploy hook. #39 RLS
+integration test (would validate the 0005 policies/trigger). schema.sql full
+convergence (backfill reviews/email_log/review_flags) - hygiene follow-up. A
+dev->main promotion would ship React 19 + deps + email + payments + moderation.
